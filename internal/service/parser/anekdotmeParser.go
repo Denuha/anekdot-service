@@ -39,12 +39,12 @@ func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 				decodedText = strings.Replace(decodedText, "вЂ”", "—", -1)
 
 				var tmp = models.Anekdot{
-					//SenderID: "anekdotme.ru",
+					SenderID:   1,
 					Text:       decodedText,
 					ExternalID: id,
+					Status:     int(models.StatusAnekdotOK),
 				}
 				anekdotList = append(anekdotList, tmp)
-				fmt.Println(decodedText)
 			})
 		},
 		LogDisabled: true,

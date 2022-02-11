@@ -15,13 +15,17 @@ const (
 )
 
 type Repositories struct {
+	AnekdotDB AnekdotDB
 }
 
-type RepositoryDB interface {
+type AnekdotDB interface {
 	InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) error
 	ChangeRating(ctx context.Context, anekdotID int, method MethodRaitng) error
+	GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 }
 
 func NewRepositories(pg clientRepo.PostgresClient) *Repositories {
-	return &Repositories{}
+	return &Repositories{
+		AnekdotDB: NewAnekdotRepo(pg),
+	}
 }

@@ -1,15 +1,22 @@
 package service
 
 import (
+	"context"
+
 	"github.com/Denuha/anekdot-service/internal/config"
 	"github.com/Denuha/anekdot-service/internal/repository"
-	p "github.com/Denuha/anekdot-service/internal/service/parser"
 )
 
 type Services struct {
-	ParserService p.Parser
+	Anekdot Anekdot
+}
+
+type Anekdot interface {
+	ParseAnekdots(ctx context.Context, source string) (int, error)
 }
 
 func NewServices(cfg *config.Config, repos *repository.Repositories) *Services {
-	return &Services{}
+	return &Services{
+		Anekdot: NewAnekdotService(repos),
+	}
 }
