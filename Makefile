@@ -7,5 +7,9 @@ run:
 build:
 	go build -o anekdot-service cmd/anekdot-service/main.go
 
+up-build:
+	docker build . -t anekdot-service
+	docker-compose up
+
 up:
 	docker-compose up
