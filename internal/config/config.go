@@ -6,7 +6,8 @@ type Config struct {
 	Port      int    `envconfig:"PORT" required:"true"`
 	DBConnStr string `envconfig:"DB_CONN_STR" required:"true"`
 
-	Debug bool `envconfig:"AUTH_DEBUG" default:"false"`
+	Debug         bool   `envconfig:"AUTH_DEBUG" default:"false"`
+	TelegramToken string `envconfig:"TELEGRAM_TOKEN" required:"true"`
 }
 
 func InitConfig() (*Config, error) {

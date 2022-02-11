@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,7 +11,8 @@ import (
 	"time"
 
 	"github.com/Denuha/anekdot-service/internal/config"
-	delivery "github.com/Denuha/anekdot-service/internal/delivery/http"
+	httpDelivery "github.com/Denuha/anekdot-service/internal/delivery/http"
+	tgDelivery "github.com/Denuha/anekdot-service/internal/delivery/telegram"
 	"github.com/Denuha/anekdot-service/internal/repository"
 	"github.com/Denuha/anekdot-service/internal/repository/client"
 	"github.com/Denuha/anekdot-service/internal/server"
@@ -44,10 +44,19 @@ func Run() {
 
 	pgClient := client.NewPostgresClient(db)
 	repos := repository.NewRepositories(pgClient)
-	services := service.NewServices(cfg, repos)
-	handlers := delivery.NewHandlers(services, log)
+	services := service.NewServices(cfg, repos, log)
+	handlers := httpDelivery.NewHandlers(services, log)
+	tgDelivery := tgDelivery.NewTelegramDelivery(services, log)
 
-	srv := server.NewServer(*cfg, handlers.Init(cfg, log))
+	tgServer := server.NewTelegramServer(*cfg, tgDelivery)
+	go func() {
+		err := tgServer.Run()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	srv := server.NewServer(*cfg, handlers.Init())
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("error occurred while running http server: %s\n", err)
@@ -63,6 +72,4 @@ func Run() {
 	if err := srv.Stop(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
-
-	fmt.Println("hello")
 }

@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 
-	"github.com/Denuha/anekdot-service/internal/config"
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/service"
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ type Handler struct {
 	log      *logrus.Logger
 }
 
-func (h *Handler) Init(_ *config.Config, log *logrus.Logger) *gin.Engine {
+func (h *Handler) Init() *gin.Engine {
 	router := gin.Default()
 
 	api := router.Group("/api/v1")

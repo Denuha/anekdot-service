@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/geziyor/geziyor v0.0.0-20211211110410-34d17a2d3d5a
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pressly/goose v2.7.0+incompatible
@@ -15,6 +16,7 @@ require (
 )
 
 require (
+	github.com/Syfaro/telegram-bot-api v4.6.4+incompatible // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/antchfx/htmlquery v1.2.4 // indirect
@@ -64,6 +66,7 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
+	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
