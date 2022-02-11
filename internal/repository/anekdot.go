@@ -48,8 +48,8 @@ func (a *anekdot) ChangeRating(ctx context.Context, anekdotID int, method Method
 func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
 	querySelect := `
 		SELECT a.id, a."text", a.rating, a.external_id, a.create_time, a.status, a.sender_id, s."name" 
-		FROM anekdot.anekdot.anekdot a
-		LEFT JOIN anekdot.anekdot.sender s on a.sender_id=s.id 
+		FROM anekdot.anekdot a
+		LEFT JOIN anekdot.sender s on a.sender_id=s.id 
 		ORDER BY random() limit 1;`
 
 	cl, err := a.client.GetClient()

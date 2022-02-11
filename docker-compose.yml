@@ -1,0 +1,40 @@
+version: "3.5"
+
+services:
+  postgres-anekdot-service:
+    image: postgres
+    container_name: postgres-anekdot-service
+    restart: always
+    networks:
+      - mynet
+    ports:
+    - 5440:5432
+    volumes:
+      - data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  anekdot-service:
+    image: anekdot-service
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+    env_file: .env
+    depends_on:
+      - postgres-anekdot-service
+    networks:
+      - mynet
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    
+networks:
+  mynet:
+    driver: bridge
+
+volumes:
+  data:

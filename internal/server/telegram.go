@@ -21,6 +21,15 @@ type serverTelegram struct {
 }
 
 func (s *serverTelegram) Run() error {
+	// client := &http.Client{
+	// 	Timeout: time.Minute,
+	// 	Transport: &http.Transport{
+	// 		TLSClientConfig: &tls.Config{
+	// 			InsecureSkipVerify: true,
+	// 		},
+	// 	}}
+
+	// bot, err := tgbotapi.NewBotAPIWithClient(s.cfg.TelegramToken, "https://api.telegram.org", client)
 	bot, err := tgbotapi.NewBotAPI(s.cfg.TelegramToken)
 
 	if err != nil {
