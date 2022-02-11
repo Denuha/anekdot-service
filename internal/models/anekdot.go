@@ -1,11 +1,14 @@
 package models
 
 type Anekdot struct {
-	SenderID int
-	Text     string
-	Rating   int
+	SenderID   int
+	Text       string
+	Rating     int
+	ExternalID string
 }
 
 type Sender struct {
-	ID int
+	ID          int
+	Description string
+	Name        string
 }

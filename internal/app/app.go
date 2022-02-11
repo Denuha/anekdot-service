@@ -45,7 +45,7 @@ func Run() {
 	pgClient := client.NewPostgresClient(db)
 	repos := repository.NewRepositories(pgClient)
 	services := service.NewServices(cfg, repos)
-	handlers := delivery.NewHandlers(services)
+	handlers := delivery.NewHandlers(services, log)
 
 	srv := server.NewServer(*cfg, handlers.Init(cfg, log))
 	go func() {

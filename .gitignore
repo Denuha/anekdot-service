@@ -1,2 +1,4 @@
 vendor/
 .env
+.vscode
+cmd/anekdot-service/migrations
