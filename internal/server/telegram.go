@@ -16,14 +16,12 @@ type TelegranServer interface {
 }
 
 type serverTelegram struct {
-	bot *tgbotapi.BotAPI
 	tg  *delivery.Telegram
 	cfg config.Config
 }
 
 func (s *serverTelegram) Run() error {
 	bot, err := tgbotapi.NewBotAPI(s.cfg.TelegramToken)
-	s.bot = bot
 
 	if err != nil {
 		return fmt.Errorf("bot api: %s", err.Error())
@@ -33,8 +31,8 @@ func (s *serverTelegram) Run() error {
 	//Set update timeout
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	updates := s.bot.GetUpdatesChan(u)
-	s.tg.ProcessUpdates(&updates, s.bot)
+	updates := bot.GetUpdatesChan(u)
+	s.tg.ProcessUpdates(&updates, bot)
 
 	return fmt.Errorf("telegram server is off: %s", err.Error())
 }
