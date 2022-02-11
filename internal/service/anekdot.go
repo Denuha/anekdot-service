@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/repository"
 	"github.com/Denuha/anekdot-service/internal/service/parser"
 )
@@ -13,7 +14,6 @@ type anekdot struct {
 }
 
 func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error) {
-
 	var parserClient parser.Parser
 
 	switch source {
@@ -39,6 +39,14 @@ func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error)
 	}
 
 	return len(anekdots), nil
+}
+
+func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
+	anekdot, err := a.anekDB.GetRandomAnekdot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return anekdot, nil
 }
 
 func NewAnekdotService(repos *repository.Repositories) Anekdot {

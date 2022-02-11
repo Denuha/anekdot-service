@@ -3,13 +3,14 @@ package models
 import "time"
 
 type Anekdot struct {
-	ID         int
-	SenderID   int
-	Text       string
-	Rating     int
-	ExternalID string
-	CreateTime time.Time
-	Status     int
+	ID           int
+	Sender       Sender
+	Text         string
+	Rating       int
+	ExternalID   string
+	CreateTime   time.Time
+	Status       int
+	StatusString string
 }
 
 type Sender struct {

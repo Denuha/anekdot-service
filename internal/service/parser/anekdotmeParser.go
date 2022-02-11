@@ -39,7 +39,9 @@ func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 				decodedText = strings.Replace(decodedText, "вЂ”", "—", -1)
 
 				var tmp = models.Anekdot{
-					SenderID:   1,
+					Sender: models.Sender{
+						ID: 1,
+					},
 					Text:       decodedText,
 					ExternalID: id,
 					Status:     int(models.StatusAnekdotOK),

@@ -10,6 +10,7 @@ func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 	anekdotGroup := rg.Group("/anekdot")
 
 	anekdotGroup.GET("/parse", h.parseAnekdots)
+	anekdotGroup.GET("/random", h.getRandomAnekdot)
 }
 
 func (h *Handler) parseAnekdots(ctx *gin.Context) {
@@ -32,4 +33,14 @@ func (h *Handler) parseAnekdots(ctx *gin.Context) {
 	}
 
 	h.Response(ctx, http.StatusOK, nil, map[string]int{"count": count})
+}
+
+func (h *Handler) getRandomAnekdot(ctx *gin.Context) {
+	anekdot, err := h.services.Anekdot.GetRandomAnekdot(ctx)
+	if err != nil {
+		h.Response(ctx, http.StatusInternalServerError, err, nil)
+		return
+	}
+
+	h.Response(ctx, http.StatusOK, nil, anekdot)
 }
