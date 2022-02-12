@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script>
+      $(document).on("ready", () => {
+          $(document).on("click", "#random-anekdot", function(){
+              console.log("click");       
+
+                $.ajax({
+                    url: 'http://192.168.0.103:1337/api/v1/anekdot/random',         /* Куда пойдет запрос */
+                    method: 'get',             /* Метод передачи (post или get) */
+                    dataType: 'json',          /* Тип данных в ответе (xml, json, script, html). */
+                    data: {},    /* Параметры передаваемые в запросе. */
+                    success: function(result){   /* функция которая будет выполнена после успешного запроса.  */
+                        console.log(result);            /* В переменной data содержится ответ от index.php. */
+                    }
+                });
+            });         
+      })
+  </script>
+  <title>HTML5</title>
+  <style>
+   article, aside, details, figcaption, figure, footer,header,
+   hgroup, menu, nav, section { display: block; }
+  </style>
+ </head>
+ <body>
+     <div>
+         <button id="random-anekdot">Анекдот</button>
+         <button id="parse">Обновить базу</button>
+     </div>
+  <p>Привет, мир</p>
+  <script>
+      
+  </script>
+  
+ </body>
+</html>
+
