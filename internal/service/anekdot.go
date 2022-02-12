@@ -49,6 +49,18 @@ func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 	return anekdot, nil
 }
 
+func (a *anekdot) UpdateRating(ctx context.Context, anekdotID int, metod repository.MethodRaitng) error {
+	err := a.anekDB.ChangeRating(ctx, anekdotID, metod)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error) {
+	return a.anekDB.GetAnekdotByID(ctx, anekdotID)
+}
+
 func NewAnekdotService(repos *repository.Repositories) Anekdot {
 	return &anekdot{
 		anekDB: repos.AnekdotDB,
