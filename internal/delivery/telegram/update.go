@@ -9,7 +9,7 @@ import (
 func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotapi.BotAPI) {
 	for update := range *updates {
 		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
 
 			var msg tgbotapi.MessageConfig
 
@@ -23,6 +23,13 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 			default:
 				msg = t.processCommandUnknown(&update)
 			}
+			bot.Send(msg)
+		}
+
+		if update.CallbackQuery != nil {
+			log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
+			t.callbackQueryHandler(update.CallbackQuery)
+			msg := t.processCommandRandomCallback(&update)
 			bot.Send(msg)
 		}
 	}
