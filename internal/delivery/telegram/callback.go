@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -41,20 +40,12 @@ func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.Cal
 }
 
 func (t *Telegram) processCommandRandomCallback(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
-	user, err := t.userUtls.GetUserFromContext(ctx)
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println(user)
-
 	anekdot, err := t.services.Anekdot.GetRandomAnekdot(ctx)
 	if err != nil {
 		t.log.Println(err)
 	}
 	message := anekdot.Text
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, message)
-	msg.ParseMode = "html"
-
 	msg.ReplyMarkup = createKeyboardRandomAnekdot(anekdot)
 
 	return msg

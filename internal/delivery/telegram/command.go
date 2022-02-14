@@ -22,7 +22,6 @@ func (t *Telegram) processCommandRandom(update *tgbotapi.Update) tgbotapi.Messag
 	}
 	message := anekdot.Text
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
-	msg.ParseMode = "html"
 
 	msg.ReplyMarkup = createKeyboardRandomAnekdot(anekdot)
 

@@ -17,7 +17,8 @@ CREATE TABLE anekdot.user_votes (
 	value int8 NOT NULL DEFAULT 0,
 	CONSTRAINT user_votes_pk PRIMARY KEY (id),
 	CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES anekdot."user"(id),
-	CONSTRAINT anekdot_fk FOREIGN KEY (anekdot_id) REFERENCES anekdot.anekdot(id)
+	CONSTRAINT anekdot_fk FOREIGN KEY (anekdot_id) REFERENCES anekdot.anekdot(id),
+	CONSTRAINT user_votes_un UNIQUE (user_id,anekdot_id,value)
 );
 
 ALTER TABLE anekdot.anekdot DROP COLUMN rating;
