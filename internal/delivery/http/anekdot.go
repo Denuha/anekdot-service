@@ -71,7 +71,7 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 		case "dislike":
 			value = -1
 		default:
-			h.Response(ctx, http.StatusBadRequest, errors.New("method is not inc/dec"), "")
+			h.Response(ctx, http.StatusBadRequest, errors.New("method is not like/dislike"), "")
 			return
 		}
 	}
