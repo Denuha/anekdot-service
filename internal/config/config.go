@@ -8,6 +8,7 @@ type Config struct {
 
 	Debug         bool   `envconfig:"AUTH_DEBUG" default:"false"`
 	TelegramToken string `envconfig:"TELEGRAM_TOKEN" required:"true"`
+	TelegramOn    bool   `envconfig:"TELEGRAM_ON" default:"true"`
 }
 
 func InitConfig() (*Config, error) {

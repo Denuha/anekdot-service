@@ -48,13 +48,15 @@ func Run() {
 	handlers := httpDelivery.NewHandlers(services, log, cfg)
 	tgDelivery := tgDelivery.NewTelegramDelivery(services, log, repos)
 
-	tgServer := server.NewTelegramServer(*cfg, tgDelivery)
-	go func() {
-		err := tgServer.Run()
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}()
+	if cfg.TelegramOn {
+		tgServer := server.NewTelegramServer(*cfg, tgDelivery)
+		go func() {
+			err := tgServer.Run()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}()
+	}
 
 	srv := server.NewServer(*cfg, handlers.Init())
 	go func() {
