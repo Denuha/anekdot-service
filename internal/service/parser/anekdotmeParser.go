@@ -36,7 +36,7 @@ func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 				decodedText = strings.ReplaceAll(decodedText, "\t", "")
 				decodedText = strings.Replace(decodedText, "\n", "", 1)
 				decodedText = strings.Replace(decodedText, "  ", "", -1)
-				decodedText = strings.Replace(decodedText, "вЂ”", "\n—", -1)
+				decodedText = strings.Replace(decodedText, "вЂ”", "—", -1)
 
 				var tmp = models.Anekdot{
 					Sender: models.Sender{
