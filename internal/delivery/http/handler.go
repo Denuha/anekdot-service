@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/Denuha/anekdot-service/internal/config"
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/service"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,7 @@ import (
 type Handler struct {
 	services *service.Services
 	log      *logrus.Logger
+	cfg      *config.Config
 }
 
 func (h *Handler) Init() *gin.Engine {
@@ -46,9 +48,10 @@ func (h *Handler) Response(c *gin.Context,
 	c.AbortWithStatusJSON(statusCode, resp)
 }
 
-func NewHandlers(services *service.Services, log *logrus.Logger) *Handler {
+func NewHandlers(services *service.Services, log *logrus.Logger, cfg *config.Config) *Handler {
 	return &Handler{
 		services: services,
 		log:      log,
+		cfg:      cfg,
 	}
 }

@@ -45,8 +45,8 @@ func Run() {
 	pgClient := client.NewPostgresClient(db)
 	repos := repository.NewRepositories(pgClient)
 	services := service.NewServices(cfg, repos, log)
-	handlers := httpDelivery.NewHandlers(services, log)
-	tgDelivery := tgDelivery.NewTelegramDelivery(services, log)
+	handlers := httpDelivery.NewHandlers(services, log, cfg)
+	tgDelivery := tgDelivery.NewTelegramDelivery(services, log, repos)
 
 	tgServer := server.NewTelegramServer(*cfg, tgDelivery)
 	go func() {
