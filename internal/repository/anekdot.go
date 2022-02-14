@@ -47,10 +47,10 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 	querySelect := `
 	SELECT a.id, a."text", a.external_id, a.create_time, a.status, a.sender_id, s."name",
 		(SELECT count(u.value) 
-				FROM user_votes u
+				FROM anekdot.user_votes u
 				WHERE u.anekdot_id= a.id AND u.value > 0) AS likes ,
 		(SELECT count(u.value) 
-				FROM user_votes u
+				FROM anekdot.user_votes u
 				WHERE u.anekdot_id= a.id AND u.value < 0) AS dislikes 
 	FROM anekdot.anekdot a
 	LEFT JOIN anekdot.sender s ON a.sender_id=s.id 
