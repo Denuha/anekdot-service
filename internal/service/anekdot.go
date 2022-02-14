@@ -63,7 +63,10 @@ func (a *anekdot) UpdateRating(ctx context.Context, anekdotID int, value int) er
 	vote, err := a.anekDB.GetUserVoteByAnekdotID(ctx, anekdotID, user.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			a.anekDB.PostUserVoteByAnekdotID(ctx, anekdotID, user.ID, value)
+			errPost := a.anekDB.PostUserVoteByAnekdotID(ctx, anekdotID, user.ID, value)
+			if errPost != nil {
+				return errPost
+			}
 			return nil
 		} else {
 			return err

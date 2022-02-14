@@ -7,7 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func createKeyboardRandomAnekdot(anekdot *models.Anekdot) tgbotapi.InlineKeyboardMarkup {
+func createKeyboardRating(anekdot *models.Anekdot) tgbotapi.InlineKeyboardMarkup {
 	btnLike := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("👍 %d", anekdot.Likes),
 		fmt.Sprintf("rating:%d:like", anekdot.ID))
 

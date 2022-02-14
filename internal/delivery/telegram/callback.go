@@ -39,14 +39,15 @@ func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.Cal
 	}
 }
 
-func (t *Telegram) processCommandRandomCallback(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
+// callback на like/dislike
+func (t *Telegram) callbackRating(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
 	anekdot, err := t.services.Anekdot.GetRandomAnekdot(ctx)
 	if err != nil {
 		t.log.Println(err)
 	}
 	message := anekdot.Text
 	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, message)
-	msg.ReplyMarkup = createKeyboardRandomAnekdot(anekdot)
+	msg.ReplyMarkup = createKeyboardRating(anekdot)
 
 	return msg
 }

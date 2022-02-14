@@ -15,6 +15,11 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 		if update.Message != nil {
 			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
 
+			_, err := t.getSender(&update)
+			if err != nil {
+				log.Println(err)
+			}
+
 			var msg tgbotapi.MessageConfig
 
 			switch update.Message.Text {
@@ -33,27 +38,26 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 		if update.CallbackQuery != nil {
 			log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
 
-			ctx := context.Background()
-			userTg := processUser(&update)
-			userDB, err := t.checkUser(ctx, userTg)
+			userDB, err := t.getSender(&update)
 			if err != nil {
 				log.Println(err)
 			}
 
+			ctx := context.Background()
 			ctx, err = t.userUtls.PutUserToContext(ctx, userDB)
 			if err != nil {
 				log.Println(err)
 			}
 
 			t.callbackQueryHandler(ctx, update.CallbackQuery)
-			msg := t.processCommandRandomCallback(ctx, &update)
+			msg := t.callbackRating(ctx, &update)
 			bot.Send(msg)
 		}
 	}
 }
 
-// processUser tgUser2serviceUser
-func processUser(update *tgbotapi.Update) *models.User {
+// getSender Получает отправителя и добавляет его в локальную БД
+func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 	var tgUSer *tgbotapi.User
 
 	if update.Message != nil {
@@ -63,18 +67,8 @@ func processUser(update *tgbotapi.Update) *models.User {
 		tgUSer = update.CallbackQuery.From
 	}
 
-	user := models.User{
-		UserName:   tgUSer.String(),
-		ExternalID: strconv.Itoa(int(tgUSer.ID)),
-		Realm:      "tg",
-	}
+	ctx := context.Background()
 
-	return &user
-}
-
-// tg middleware
-// return user from DB
-func (t *Telegram) checkUser(ctx context.Context, user *models.User) (*models.User, error) {
 	tx, err := t.CommonDB.BeginTransaction(ctx)
 	if err != nil {
 		return nil, err
@@ -82,20 +76,29 @@ func (t *Telegram) checkUser(ctx context.Context, user *models.User) (*models.Us
 
 	var userDB *models.User
 
+	user := models.User{
+		UserName:   tgUSer.String(),
+		ExternalID: strconv.Itoa(int(tgUSer.ID)),
+		Realm:      "tg",
+	}
+
 	userDB, err = t.UserDB.GetUserByRealmAndExternalID(ctx, tx, user.Realm, user.ExternalID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			userDB, err = t.UserDB.InsertUser(ctx, tx, user)
+			userDB, err = t.UserDB.InsertUser(ctx, tx, &user)
 			if err != nil {
+				_ = tx.Rollback()
 				return nil, err
 			}
 		} else {
+			_ = tx.Rollback()
 			return nil, err
 		}
 	}
 
 	err = t.CommonDB.CommitTransaction(ctx, tx)
 	if err != nil {
+		_ = tx.Rollback()
 		return nil, err
 	}
 	return userDB, nil
