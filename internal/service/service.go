@@ -11,6 +11,7 @@ import (
 
 type Services struct {
 	Anekdot Anekdot
+	User    User
 }
 
 type Anekdot interface {
@@ -21,8 +22,13 @@ type Anekdot interface {
 	UpdateRating(ctx context.Context, anekdotID int, value int) error
 }
 
+type User interface {
+	GetUserList(ctx context.Context) ([]models.User, error)
+}
+
 func NewServices(cfg *config.Config, repos *repository.Repositories, log *logrus.Logger) *Services {
 	return &Services{
 		Anekdot: NewAnekdotService(repos),
+		User:    NewUserService(repos),
 	}
 }

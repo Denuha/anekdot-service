@@ -22,6 +22,7 @@ func (h *Handler) Init() *gin.Engine {
 	api := router.Group("/api/v1")
 	{
 		h.initRoutesAnekdot(api)
+		h.initRoutesUser(api)
 	}
 
 	router.GET("/ping", func(c *gin.Context) {
