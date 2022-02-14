@@ -54,6 +54,42 @@ func (u *userDB) GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, re
 	return &user, nil
 }
 
+func (u *userDB) GetUserList(ctx context.Context) ([]models.User, error) {
+	const querySelect = `SELECT id, username, external_id, realm, create_time 
+	FROM anekdot."user";`
+
+	users := make([]models.User, 0)
+
+	cl, err := u.client.GetClient()
+	if err != nil {
+		return users, err
+	}
+
+	rows, err := cl.QueryContext(ctx, querySelect)
+	if err != nil {
+		return users, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tmp models.User
+		err = rows.Scan(
+			&tmp.ID,
+			&tmp.UserName,
+			&tmp.ExternalID,
+			&tmp.Realm,
+			&tmp.CreateTime,
+		)
+
+		if err != nil {
+			return users, err
+		}
+		users = append(users, tmp)
+	}
+
+	return users, nil
+}
+
 func NewUserRepo(client clientRepo.PostgresClient) UserDB {
 	return &userDB{
 		client: client}
