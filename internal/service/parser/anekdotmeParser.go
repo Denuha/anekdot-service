@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/Denuha/anekdot-service/internal/models"
@@ -29,14 +29,14 @@ func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 				decoder := charmap.Windows1251.NewDecoder()
 				decodedText, err := decoder.String(text)
 				if err != nil {
-					fmt.Println(err)
-
+					log.Println(err)
+					return
 				}
 
 				decodedText = strings.ReplaceAll(decodedText, "\t", "")
 				decodedText = strings.Replace(decodedText, "\n", "", 1)
 				decodedText = strings.Replace(decodedText, "  ", "", -1)
-				decodedText = strings.Replace(decodedText, "вЂ”", "—", -1)
+				decodedText = strings.Replace(decodedText, "вЂ”", "\n—", -1)
 
 				var tmp = models.Anekdot{
 					Sender: models.Sender{

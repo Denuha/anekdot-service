@@ -2,15 +2,20 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/repository"
 	"github.com/Denuha/anekdot-service/internal/service/parser"
+	"github.com/Denuha/anekdot-service/internal/utils"
 )
 
 type anekdot struct {
-	anekDB repository.AnekdotDB
+	anekDB   repository.AnekdotDB
+	commonDB repository.CommonDB
+	userDB   repository.UserDB
+	utils.UtilsUser
 }
 
 func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error) {
@@ -49,12 +54,23 @@ func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 	return anekdot, nil
 }
 
-func (a *anekdot) UpdateRating(ctx context.Context, anekdotID int, metod repository.MethodRaitng) error {
-	err := a.anekDB.ChangeRating(ctx, anekdotID, metod)
+func (a *anekdot) UpdateRating(ctx context.Context, anekdotID int, value int) error {
+	user, err := a.GetUserFromContext(ctx)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	vote, err := a.anekDB.GetUserVoteByAnekdotID(ctx, anekdotID, user.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			a.anekDB.PostUserVoteByAnekdotID(ctx, anekdotID, user.ID, value)
+			return nil
+		} else {
+			return err
+		}
+	}
+
+	return a.anekDB.UpdateUserVoteByAnekdotID(ctx, anekdotID, vote.UserID, value)
 }
 
 func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error) {
@@ -63,6 +79,9 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 
 func NewAnekdotService(repos *repository.Repositories) Anekdot {
 	return &anekdot{
-		anekDB: repos.AnekdotDB,
+		anekDB:    repos.AnekdotDB,
+		UtilsUser: utils.NewUtilsUser(),
+		commonDB:  repos.CommonDB,
+		userDB:    repos.UserDB,
 	}
 }

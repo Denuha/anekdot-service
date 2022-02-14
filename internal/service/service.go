@@ -16,8 +16,9 @@ type Services struct {
 type Anekdot interface {
 	ParseAnekdots(ctx context.Context, source string) (int, error)
 	GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
-	UpdateRating(ctx context.Context, anekdotID int, metod repository.MethodRaitng) error
 	GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error)
+
+	UpdateRating(ctx context.Context, anekdotID int, value int) error
 }
 
 func NewServices(cfg *config.Config, repos *repository.Repositories, log *logrus.Logger) *Services {

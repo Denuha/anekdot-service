@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Denuha/anekdot-service/internal/repository"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 	anekdotGroup := rg.Group("/anekdot")
+	anekdotGroup.Use(h.userVerify())
 
 	anekdotGroup.GET("/parse", h.parseAnekdots)
 	anekdotGroup.GET("/random", h.getRandomAnekdot)
@@ -51,9 +51,8 @@ func (h *Handler) getRandomAnekdot(ctx *gin.Context) {
 }
 
 func (h *Handler) updateRating(ctx *gin.Context) {
-	var methodStr string
-	var method repository.MethodRaitng
-	var delta int
+	var valueStr string
+	var value int
 
 	anekdotIDstr := ctx.Param("id")
 	anekdotID, err := strconv.Atoi(anekdotIDstr)
@@ -63,34 +62,32 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 	}
 
 	paramMap := ctx.Request.URL.Query()
-	methodQuery := paramMap["method"]
-	if len(methodQuery) != 0 {
-		methodStr = methodQuery[0]
-		switch methodStr {
-		case "inc":
-			delta = 1
-			method = repository.MethodIncr
-		case "dec":
-			delta = -1
-			method = repository.MethodDecr
+	valueQuery := paramMap["value"]
+	if len(valueQuery) != 0 {
+		valueStr = valueQuery[0]
+		switch valueStr {
+		case "like":
+			value = 1
+		case "dislike":
+			value = -1
 		default:
-			h.Response(ctx, http.StatusBadRequest, errors.New("method is not inc/dec"), "")
+			h.Response(ctx, http.StatusBadRequest, errors.New("method is not like/dislike"), "")
 			return
 		}
 	}
 
-	if delta == 0 {
-		h.Response(ctx, http.StatusOK, nil, map[string]int{"delta": delta})
+	if value == 0 {
+		h.Response(ctx, http.StatusOK, nil, map[string]int{"value": value})
 		return
 	}
 
-	err = h.services.Anekdot.UpdateRating(ctx, anekdotID, method)
+	err = h.services.Anekdot.UpdateRating(ctx, anekdotID, value)
 	if err != nil {
 		h.Response(ctx, http.StatusInternalServerError, err, "")
 		return
 	}
 
-	h.Response(ctx, http.StatusOK, nil, map[string]int{"delta": delta})
+	h.Response(ctx, http.StatusOK, nil, map[string]int{"delta": value})
 }
 
 func (h *Handler) getAnekdotByID(ctx *gin.Context) {

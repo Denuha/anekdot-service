@@ -42,45 +42,18 @@ func (a *anekdot) InsertAnekdotList(ctx context.Context, anekdotList []models.An
 
 	return nil
 }
-func (a *anekdot) ChangeRating(ctx context.Context, anekdotID int, method MethodRaitng) error {
-	queryUpdate := `
-	UPDATE anekdot.anekdot 
-	SET rating = rating + $1
-	WHERE id = $2;`
-
-	cl, err := a.client.GetClient()
-	if err != nil {
-		return err
-	}
-
-	deltaRating := 0
-
-	switch method {
-	case MethodIncr:
-		deltaRating = 1
-	case MethodDecr:
-		deltaRating = -1
-	default:
-		return errors.New("wrong method")
-	}
-
-	res, err := cl.ExecContext(ctx, queryUpdate, deltaRating, anekdotID)
-	if err != nil {
-		return err
-	}
-
-	if count, _ := res.RowsAffected(); count == 0 {
-		return errors.New("no change")
-	}
-
-	return nil
-}
 
 func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error) {
 	querySelect := `
-	SELECT a.id, a."text", a.rating, a.external_id, a.create_time, a.status, a.sender_id, s."name" 
+	SELECT a.id, a."text", a.external_id, a.create_time, a.status, a.sender_id, s."name",
+		(SELECT count(u.value) 
+				FROM anekdot.user_votes u
+				WHERE u.anekdot_id= a.id AND u.value > 0) AS likes ,
+		(SELECT count(u.value) 
+				FROM anekdot.user_votes u
+				WHERE u.anekdot_id= a.id AND u.value < 0) AS dislikes 
 	FROM anekdot.anekdot a
-	LEFT JOIN anekdot.sender s on a.sender_id=s.id 
+	LEFT JOIN anekdot.sender s ON a.sender_id=s.id 
 	WHERE a.id = $1;`
 
 	cl, err := a.client.GetClient()
@@ -94,12 +67,13 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 	err = row.Scan(
 		&anekdot.ID,
 		&anekdot.Text,
-		&anekdot.Rating,
 		&anekdot.ExternalID,
 		&anekdot.CreateTime,
 		&anekdot.Status,
 		&anekdot.Sender.ID,
 		&anekdot.Sender.Name,
+		&anekdot.Likes,
+		&anekdot.Dislikes,
 	)
 
 	if err != nil {
@@ -107,16 +81,21 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 	}
 
 	return &anekdot, nil
-
-	return nil, nil
 }
 
 func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
 	querySelect := `
-		SELECT a.id, a."text", a.rating, a.external_id, a.create_time, a.status, a.sender_id, s."name" 
-		FROM anekdot.anekdot a
-		LEFT JOIN anekdot.sender s on a.sender_id=s.id 
-		ORDER BY random() limit 1;`
+	SELECT a.id, a."text", a.external_id, a.create_time, a.status, a.sender_id, s."name",  
+	(SELECT count(u.value) 
+			FROM anekdot.user_votes u
+			WHERE u.anekdot_id= a.id AND u.value > 0) AS likes ,
+	(SELECT count(u.value) 
+			FROM anekdot.user_votes u
+			WHERE u.anekdot_id= a.id AND u.value < 0) AS dislikes 
+	FROM anekdot.anekdot a
+	LEFT JOIN anekdot.sender s ON a.sender_id=s.id
+	LEFT JOIN anekdot.user_votes u ON a.id=u.anekdot_id
+	ORDER BY random() limit 1`
 
 	cl, err := a.client.GetClient()
 	if err != nil {
@@ -129,12 +108,13 @@ func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 	err = row.Scan(
 		&anekdot.ID,
 		&anekdot.Text,
-		&anekdot.Rating,
 		&anekdot.ExternalID,
 		&anekdot.CreateTime,
 		&anekdot.Status,
 		&anekdot.Sender.ID,
 		&anekdot.Sender.Name,
+		&anekdot.Likes,
+		&anekdot.Dislikes,
 	)
 
 	if err != nil {
@@ -142,6 +122,71 @@ func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 	}
 
 	return &anekdot, nil
+}
+
+func (a *anekdot) GetUserVoteByAnekdotID(ctx context.Context, anekdotID int, userID int64) (*models.AnekdotVote, error) {
+	const querySelect = `SELECT user_id, anekdot_id, value 
+	FROM anekdot.user_votes
+	WHERE user_id=$1 AND anekdot_id=$2;`
+
+	cl, err := a.client.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	var vote models.AnekdotVote
+	row := cl.QueryRowContext(ctx, querySelect, userID, anekdotID)
+	err = row.Scan(
+		&vote.UserID,
+		&vote.AnekdotID,
+		&vote.Value,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &vote, nil
+}
+
+func (a *anekdot) UpdateUserVoteByAnekdotID(ctx context.Context, anekdotID int, userID int64, value int) error {
+	const queyUpdate = `UPDATE anekdot.user_votes
+	SET value=$1
+	WHERE user_id=$2 AND anekdot_id=$3;`
+
+	cl, err := a.client.GetClient()
+	if err != nil {
+		return err
+	}
+
+	res, err := cl.ExecContext(ctx, queyUpdate, value, userID, anekdotID)
+	if err != nil {
+		return err
+	}
+	if count, _ := res.RowsAffected(); count < 1 {
+		return errors.New("no change")
+	}
+
+	return nil
+}
+
+func (a *anekdot) PostUserVoteByAnekdotID(ctx context.Context, anekdotID int, userID int64, value int) error {
+	const queyUpdate = `INSERT INTO anekdot.user_votes (user_id, anekdot_id, value)
+	VALUES ($1,$2,$3);`
+
+	cl, err := a.client.GetClient()
+	if err != nil {
+		return err
+	}
+
+	res, err := cl.ExecContext(ctx, queyUpdate, userID, anekdotID, value)
+	if err != nil {
+		return err
+	}
+	if count, _ := res.RowsAffected(); count < 1 {
+		return errors.New("no change")
+	}
+
+	return nil
 }
 
 func NewAnekdotRepo(client clientRepo.PostgresClient) AnekdotDB {
