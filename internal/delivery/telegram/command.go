@@ -17,9 +17,12 @@ func (t *Telegram) processCommandStart(update *tgbotapi.Update) tgbotapi.Message
 // /random
 func (t *Telegram) processCommandRandom(update *tgbotapi.Update) tgbotapi.MessageConfig {
 	anekdot, err := t.services.Anekdot.GetRandomAnekdot(context.Background())
+
 	if err != nil {
 		t.log.Println(err)
+		return tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
 	}
+
 	message := anekdot.Text
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 
