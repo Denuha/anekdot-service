@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/Denuha/anekdot-service/internal/auth"
 	"github.com/Denuha/anekdot-service/internal/config"
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/service"
@@ -14,6 +15,7 @@ type Handler struct {
 	services *service.Services
 	log      *logrus.Logger
 	cfg      *config.Config
+	auth     *auth.Auth
 }
 
 func (h *Handler) Init() *gin.Engine {
@@ -23,6 +25,7 @@ func (h *Handler) Init() *gin.Engine {
 	{
 		h.initRoutesAnekdot(api)
 		h.initRoutesUser(api)
+		h.initRoutesAuth(api)
 	}
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -49,10 +52,11 @@ func (h *Handler) Response(c *gin.Context,
 	c.AbortWithStatusJSON(statusCode, resp)
 }
 
-func NewHandlers(services *service.Services, log *logrus.Logger, cfg *config.Config) *Handler {
+func NewHandlers(services *service.Services, log *logrus.Logger, cfg *config.Config, auth *auth.Auth) *Handler {
 	return &Handler{
 		services: services,
 		log:      log,
 		cfg:      cfg,
+		auth:     auth,
 	}
 }

@@ -30,6 +30,9 @@ type UserDB interface {
 	InsertUser(ctx context.Context, tx *sql.Tx, user *models.User) (*models.User, error)
 	GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, realm, externalID string) (*models.User, error)
 	GetUserList(ctx context.Context) ([]models.User, error)
+	GetUserByID(ctx context.Context, userID int) (*models.User, error)
+	CreateUser(ctx context.Context, user *models.UserRegistation) (int, error)
+	SelectLogin(ctx context.Context, username, realm, pass string) (int, error)
 }
 
 type CommonDB interface {

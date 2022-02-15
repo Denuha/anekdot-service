@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Denuha/anekdot-service/internal/auth"
 	"github.com/Denuha/anekdot-service/internal/config"
 	httpDelivery "github.com/Denuha/anekdot-service/internal/delivery/http"
 	tgDelivery "github.com/Denuha/anekdot-service/internal/delivery/telegram"
@@ -45,7 +46,8 @@ func Run() {
 	pgClient := client.NewPostgresClient(db)
 	repos := repository.NewRepositories(pgClient)
 	services := service.NewServices(cfg, repos, log)
-	handlers := httpDelivery.NewHandlers(services, log, cfg)
+	auth := auth.NewAuth(cfg, &repos.UserDB)
+	handlers := httpDelivery.NewHandlers(services, log, cfg, auth)
 	tgDelivery := tgDelivery.NewTelegramDelivery(services, log, repos)
 
 	if cfg.TelegramOn {

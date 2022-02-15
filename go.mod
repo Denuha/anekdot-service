@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/Masterminds/squirrel v1.5.2
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/geziyor/geziyor v0.0.0-20211211110410-34d17a2d3d5a
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
@@ -29,6 +30,7 @@ require (
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect

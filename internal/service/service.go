@@ -24,11 +24,13 @@ type Anekdot interface {
 
 type User interface {
 	GetUserList(ctx context.Context) ([]models.User, error)
+	Registration(ctx context.Context, user *models.UserRegistation) (int, error)
+	Login(ctx context.Context, user *models.UserLogin) (string, error)
 }
 
 func NewServices(cfg *config.Config, repos *repository.Repositories, log *logrus.Logger) *Services {
 	return &Services{
 		Anekdot: NewAnekdotService(repos),
-		User:    NewUserService(repos),
+		User:    NewUserService(repos, cfg),
 	}
 }
