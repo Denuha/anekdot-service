@@ -87,7 +87,7 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 		return
 	}
 
-	h.Response(ctx, http.StatusOK, nil, map[string]int{"delta": value})
+	h.Response(ctx, http.StatusOK, nil, map[string]int{"value": value})
 }
 
 func (h *Handler) getAnekdotByID(ctx *gin.Context) {

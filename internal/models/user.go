@@ -8,4 +8,16 @@ type User struct {
 	ExternalID string
 	Realm      string
 	CreateTime time.Time
+	IsAdmin    bool `json:"-"`
+}
+
+type UserRegistation struct {
+	UserLogin
+	Realm string
+}
+
+type UserLogin struct {
+	Username string
+	Realm    string
+	Password string
 }
