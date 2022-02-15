@@ -32,3 +32,4 @@ Run docker container
 - user settings (get anekdot by cron?)
 - unit tests
 - parse likes and dislikes from http://anekdotme.ru
+- deploy to vps
