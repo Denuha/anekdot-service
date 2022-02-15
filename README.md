@@ -16,6 +16,7 @@ Run docker container
 `docker-compose up`
 ### TODO
 - swagger
+- give admin rules to user
 - create anekdot by user (status "Verification") (tg and REST)
 - accept or reject user anekdots by admin
 - send anekdots to user by cron
