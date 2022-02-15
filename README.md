@@ -21,3 +21,4 @@ Run docker container
 - accept or reject user anekdots by admin
 - send anekdots to user by cron
 - user settings (get anekdot by cron?)
+- unit tests
