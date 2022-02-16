@@ -31,6 +31,8 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 				msg = t.processCommandRandom(&update)
 			case "/help":
 				msg = t.processCommandHelp(&update)
+			case "/metrics":
+				msg = t.processCommandMetrics(&update)
 			case "/test":
 				msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Тест ОК")
 			default:

@@ -14,6 +14,7 @@ type Repositories struct {
 	AnekdotDB AnekdotDB
 	CommonDB  CommonDB
 	UserDB    UserDB
+	MetricsDB MetricsDB
 }
 
 type AnekdotDB interface {
@@ -41,10 +42,15 @@ type CommonDB interface {
 	CommitTransaction(ctx context.Context, tx *sql.Tx) error
 }
 
+type MetricsDB interface {
+	GetMetrics(ctx context.Context) (*models.Metrics, error)
+}
+
 func NewRepositories(pg clientRepo.PostgresClient) *Repositories {
 	return &Repositories{
 		AnekdotDB: NewAnekdotRepo(pg),
 		CommonDB:  NewCommonRepo(pg),
 		UserDB:    NewUserRepo(pg),
+		MetricsDB: NewMetricsRepo(pg),
 	}
 }
