@@ -9,7 +9,7 @@ Implemented work through telegram api and rest.
 - REST (with jwt) & Telegram
   - Get random anekdot and by ID
   - Create user
-  - Get statistics (number aneksots, users, votes)
+  - Get statistics (number anekdots, users, votes)
 
 ### Starting
 1. Create .env file (watch example.env)
