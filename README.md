@@ -11,7 +11,7 @@ Implemented work through telegram api and rest.
   - Create user
 
 ### Starting
-1. Create .env file (watch watch.env)
+1. Create .env file (watch example.env)
 2. `make run`
 
 Build docker image
