@@ -8,12 +8,12 @@ import (
 )
 
 type Telegram struct {
-	services *service.Services // должен остаться только тг сервис
+	services *service.Services
 	log      *logrus.Logger
 	userUtls utils.UtilsUser
 
-	CommonDB repository.CommonDB // remove it
-	UserDB   repository.UserDB   // remove it
+	CommonDB repository.CommonDB
+	UserDB   repository.UserDB
 }
 
 func NewTelegramDelivery(services *service.Services, log *logrus.Logger, repos *repository.Repositories) *Telegram {

@@ -29,6 +29,10 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 				msg = t.processCommandRandom(&update)
 			case "/help":
 				msg = t.processCommandHelp(&update)
+			case "/metrics":
+				msg = t.processCommandMetrics(&update)
+			case "/test":
+				msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Тест ОК")
 			default:
 				msg = t.processCommandUnknown(&update)
 			}
@@ -76,10 +80,17 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 
 	var userDB *models.User
 
+	// dont add group chat
+	chatID := &update.FromChat().ID
+	if *chatID < 0 {
+		chatID = nil
+	}
+
 	user := models.User{
 		UserName:   tgUSer.String(),
 		ExternalID: strconv.Itoa(int(tgUSer.ID)),
 		Realm:      "tg",
+		ChatID:     chatID,
 	}
 
 	userDB, err = t.UserDB.GetUserByRealmAndExternalID(ctx, tx, user.Realm, user.ExternalID)
@@ -91,6 +102,14 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 				return nil, err
 			}
 		} else {
+			_ = tx.Rollback()
+			return nil, err
+		}
+	}
+
+	if userDB.ChatID == nil && chatID != nil {
+		err = t.UserDB.UpdateChatID(ctx, tx, userDB.ID, chatID)
+		if err != nil {
 			_ = tx.Rollback()
 			return nil, err
 		}

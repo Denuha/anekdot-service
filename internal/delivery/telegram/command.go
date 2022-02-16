@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -41,6 +42,20 @@ func (t *Telegram) processCommandHelp(update *tgbotapi.Update) tgbotapi.MessageC
 // unknown command
 func (t *Telegram) processCommandUnknown(update *tgbotapi.Update) tgbotapi.MessageConfig {
 	message := "Я не знаю такую команду. Отправь /help для того, чтобы узнать возможности"
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
+	return msg
+}
+
+// /metrics
+func (t *Telegram) processCommandMetrics(update *tgbotapi.Update) tgbotapi.MessageConfig {
+	metrics, err := t.services.Metrics.GetMetrics(context.Background())
+	if err != nil {
+		t.log.Println(err)
+		return tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+	}
+
+	message := fmt.Sprintf("Количество пользователей: %d\nКоличетсво анекдотов: %d\nКоличетсво голосований: %d",
+		metrics.NumberUsers, metrics.NumberAnekdots, metrics.NumberUserVotes)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 	return msg
 }

@@ -12,4 +12,5 @@ var DebugUser = models.User{
 	ExternalID: "",
 	Realm:      "anekdot",
 	CreateTime: time.Now(),
+	IsAdmin:    true,
 }

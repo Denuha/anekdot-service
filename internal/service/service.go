@@ -12,6 +12,7 @@ import (
 type Services struct {
 	Anekdot Anekdot
 	User    User
+	Metrics Metrics
 }
 
 type Anekdot interface {
@@ -28,9 +29,14 @@ type User interface {
 	Login(ctx context.Context, user *models.UserLogin) (string, error)
 }
 
+type Metrics interface {
+	GetMetrics(ctx context.Context) (*models.Metrics, error)
+}
+
 func NewServices(cfg *config.Config, repos *repository.Repositories, log *logrus.Logger) *Services {
 	return &Services{
 		Anekdot: NewAnekdotService(repos),
 		User:    NewUserService(repos, cfg),
+		Metrics: NewMetricsService(repos),
 	}
 }

@@ -26,6 +26,7 @@ func (h *Handler) Init() *gin.Engine {
 		h.initRoutesAnekdot(api)
 		h.initRoutesUser(api)
 		h.initRoutesAuth(api)
+		h.initMetricsRoutes(api)
 	}
 
 	router.GET("/ping", func(c *gin.Context) {
