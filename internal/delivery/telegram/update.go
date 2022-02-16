@@ -3,7 +3,6 @@ package telegram
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -15,7 +14,6 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 	for update := range *updates {
 		if update.Message != nil {
 			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
-			fmt.Println("Chat ID:", update.FromChat().ID)
 
 			_, err := t.getSender(&update)
 			if err != nil {
@@ -43,7 +41,6 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 
 		if update.CallbackQuery != nil {
 			log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
-			fmt.Println("Chat ID:", update.FromChat().ID)
 
 			userDB, err := t.getSender(&update)
 			if err != nil {
@@ -110,7 +107,7 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 		}
 	}
 
-	if userDB.ChatID == nil {
+	if userDB.ChatID == nil && chatID != nil {
 		err = t.UserDB.UpdateChatID(ctx, tx, userDB.ID, chatID)
 		if err != nil {
 			_ = tx.Rollback()
