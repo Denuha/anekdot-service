@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/Denuha/anekdot-service/internal/models"
 	clientRepo "github.com/Denuha/anekdot-service/internal/repository/client"
@@ -13,13 +14,14 @@ type userDB struct {
 }
 
 func (u *userDB) InsertUser(ctx context.Context, tx *sql.Tx, userInsert *models.User) (*models.User, error) {
-	const queryInsertUser = `INSERT INTO anekdot.user ("username", external_id, realm)
-	VALUES ($1, $2, $3)
+	const queryInsertUser = `INSERT INTO anekdot.user ("username", external_id, realm, chat_id)
+	VALUES ($1, $2, $3, $4)
 	RETURNING id, username, external_id, realm, create_time;`
 
 	var user models.User
 
-	row := tx.QueryRowContext(ctx, queryInsertUser, userInsert.UserName, userInsert.ExternalID, userInsert.Realm)
+	row := tx.QueryRowContext(ctx, queryInsertUser, userInsert.UserName, userInsert.ExternalID,
+		userInsert.Realm, userInsert.ChatID)
 	err := row.Scan(
 		&user.ID,
 		&user.UserName,
@@ -36,7 +38,9 @@ func (u *userDB) InsertUser(ctx context.Context, tx *sql.Tx, userInsert *models.
 }
 func (u *userDB) GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, realm, externalID string) (*models.User, error) {
 	const querySelectUser = `
-	SELECT id, username, external_id, realm, create_time FROM anekdot."user" WHERE realm=$1 AND external_id=$2;`
+	SELECT id, username, external_id, realm, create_time, chat_id 
+	FROM anekdot."user" 
+	WHERE realm=$1 AND external_id=$2;`
 
 	var user models.User
 	row := tx.QueryRowContext(ctx, querySelectUser, realm, externalID)
@@ -46,6 +50,7 @@ func (u *userDB) GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, re
 		&user.ExternalID,
 		&user.Realm,
 		&user.CreateTime,
+		&user.ChatID,
 	)
 
 	if err != nil {
@@ -55,7 +60,7 @@ func (u *userDB) GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, re
 }
 
 func (u *userDB) GetUserList(ctx context.Context) ([]models.User, error) {
-	const querySelect = `SELECT id, username, external_id, realm, create_time 
+	const querySelect = `SELECT id, username, external_id, realm, create_time, chat_id 
 	FROM anekdot."user";`
 
 	users := make([]models.User, 0)
@@ -79,6 +84,7 @@ func (u *userDB) GetUserList(ctx context.Context) ([]models.User, error) {
 			&tmp.ExternalID,
 			&tmp.Realm,
 			&tmp.CreateTime,
+			&tmp.ChatID,
 		)
 
 		if err != nil {
@@ -91,7 +97,7 @@ func (u *userDB) GetUserList(ctx context.Context) ([]models.User, error) {
 }
 
 func (u *userDB) GetUserByID(ctx context.Context, userID int) (*models.User, error) {
-	const querySelect = `SELECT id, username, external_id, realm, create_time, is_admin
+	const querySelect = `SELECT id, username, external_id, realm, create_time, is_admin, chat_id
 	FROM anekdot.user u
 	WHERE u.id = $1;`
 
@@ -110,6 +116,7 @@ func (u *userDB) GetUserByID(ctx context.Context, userID int) (*models.User, err
 		&user.Realm,
 		&user.CreateTime,
 		&user.IsAdmin,
+		&user.ChatID,
 	)
 	if err != nil {
 		return nil, err
@@ -162,6 +169,24 @@ func (u *userDB) SelectLogin(ctx context.Context, username, realm, pass string) 
 	}
 
 	return id, nil
+}
+
+func (u userDB) UpdateChatID(ctx context.Context, tx *sql.Tx, userID int64, chatID *int64) error {
+	const queryUpdate = `UPDATE anekdot.user
+	SET chat_id = $1
+	WHERE id=$2;`
+
+	res, err := tx.ExecContext(ctx, queryUpdate, chatID, userID)
+	if err != nil {
+		return err
+	}
+
+	count, _ := res.RowsAffected()
+	if count == 0 {
+		return errors.New("no change")
+	}
+
+	return nil
 }
 
 func NewUserRepo(client clientRepo.PostgresClient) UserDB {

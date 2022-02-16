@@ -28,6 +28,7 @@ type AnekdotDB interface {
 
 type UserDB interface {
 	InsertUser(ctx context.Context, tx *sql.Tx, user *models.User) (*models.User, error)
+	UpdateChatID(ctx context.Context, tx *sql.Tx, userID int64, chatID *int64) error
 	GetUserByRealmAndExternalID(ctx context.Context, tx *sql.Tx, realm, externalID string) (*models.User, error)
 	GetUserList(ctx context.Context) ([]models.User, error)
 	GetUserByID(ctx context.Context, userID int) (*models.User, error)

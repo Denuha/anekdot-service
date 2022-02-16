@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -14,6 +15,7 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 	for update := range *updates {
 		if update.Message != nil {
 			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
+			fmt.Println("Chat ID:", update.FromChat().ID)
 
 			_, err := t.getSender(&update)
 			if err != nil {
@@ -29,6 +31,8 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 				msg = t.processCommandRandom(&update)
 			case "/help":
 				msg = t.processCommandHelp(&update)
+			case "/test":
+				msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Тест ОК")
 			default:
 				msg = t.processCommandUnknown(&update)
 			}
@@ -37,6 +41,7 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 
 		if update.CallbackQuery != nil {
 			log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
+			fmt.Println("Chat ID:", update.FromChat().ID)
 
 			userDB, err := t.getSender(&update)
 			if err != nil {
@@ -76,10 +81,17 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 
 	var userDB *models.User
 
+	// dont add group chat
+	chatID := &update.FromChat().ID
+	if *chatID < 0 {
+		chatID = nil
+	}
+
 	user := models.User{
 		UserName:   tgUSer.String(),
 		ExternalID: strconv.Itoa(int(tgUSer.ID)),
 		Realm:      "tg",
+		ChatID:     chatID,
 	}
 
 	userDB, err = t.UserDB.GetUserByRealmAndExternalID(ctx, tx, user.Realm, user.ExternalID)
@@ -91,6 +103,14 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 				return nil, err
 			}
 		} else {
+			_ = tx.Rollback()
+			return nil, err
+		}
+	}
+
+	if userDB.ChatID == nil {
+		err = t.UserDB.UpdateChatID(ctx, tx, userDB.ID, chatID)
+		if err != nil {
 			_ = tx.Rollback()
 			return nil, err
 		}

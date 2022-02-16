@@ -149,7 +149,7 @@ func (a *anekdot) GetUserVoteByAnekdotID(ctx context.Context, anekdotID int, use
 }
 
 func (a *anekdot) UpdateUserVoteByAnekdotID(ctx context.Context, anekdotID int, userID int64, value int) error {
-	const queyUpdate = `UPDATE anekdot.user_votes
+	const queryUpdate = `UPDATE anekdot.user_votes
 	SET value=$1
 	WHERE user_id=$2 AND anekdot_id=$3;`
 
@@ -158,7 +158,7 @@ func (a *anekdot) UpdateUserVoteByAnekdotID(ctx context.Context, anekdotID int, 
 		return err
 	}
 
-	res, err := cl.ExecContext(ctx, queyUpdate, value, userID, anekdotID)
+	res, err := cl.ExecContext(ctx, queryUpdate, value, userID, anekdotID)
 	if err != nil {
 		return err
 	}
