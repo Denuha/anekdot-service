@@ -9,7 +9,7 @@ build:
 
 up-build:
 	docker build . -t anekdot-service
-	docker-compose up
+	docker-compose up -d
 
 up:
 	docker-compose up
