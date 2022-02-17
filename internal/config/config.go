@@ -17,6 +17,10 @@ type Config struct {
 	UserPasswordSalt string        `envconfig:"USER_PASSWORD_SALT" default:"AAA"`
 	TokenSignedKey   string        `envconfig:"TOKEN_SIGNED_KEY" default:"AAA"`
 	TokenExpires     time.Duration `envconfig:"TOKEN_EXPIRES" default:"15m"`
+
+	SwaggerBasePath string `envconfig:"SWAGGER_BASE_PATH" default:""`
+	SwaggerHost     string `envconfig:"SWAGGER_HOST" default:""`
+	SwaggerVersion  string `envconfig:"SWAGGER_VERSION" default:""`
 }
 
 func InitConfig() (*Config, error) {

@@ -14,10 +14,24 @@ func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 
 	anekdotGroup.GET("/parse", h.parseAnekdots)
 	anekdotGroup.GET("/random", h.getRandomAnekdot)
-	anekdotGroup.GET("/:id", h.getAnekdotByID)
-	anekdotGroup.PUT("/:id/rating", h.updateRating)
+	anekdotGroup.GET("/:anekdotID", h.getAnekdotByID)
+	anekdotGroup.PUT("/:anekdotID/rating", h.updateRating)
 }
 
+// @Summary Parse anekdots to db
+// @Description source="anekdotme"
+// @Security ApiKeyAuth
+// @Tags Anekdot
+// @ID parseAnekdots
+// @Accept json
+// @Produce json
+// @Param source query string true "source"
+// @Failure 500 {object} models.Response "Internal Server Error"
+// @Failure 400 {object} models.Response "Bad Request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 403 {object} models.Response "Forbidden"
+// @Success 200 {object} models.Response "OK"
+// @Router /anekdot/parse [get]
 func (h *Handler) parseAnekdots(ctx *gin.Context) {
 	var source string
 
@@ -40,6 +54,19 @@ func (h *Handler) parseAnekdots(ctx *gin.Context) {
 	h.Response(ctx, http.StatusOK, nil, map[string]int{"count": count})
 }
 
+// @Summary Get random anekdot
+// @Description
+// @Security ApiKeyAuth
+// @Tags Anekdot
+// @ID getRandomAnekdot
+// @Accept json
+// @Produce json
+// @Failure 500 {object} models.Response "Internal Server Error"
+// @Failure 400 {object} models.Response "Bad Request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 403 {object} models.Response "Forbidden"
+// @Success 200 {object} models.Response{resp=models.Anekdot} "OK"
+// @Router /anekdot/random [get]
 func (h *Handler) getRandomAnekdot(ctx *gin.Context) {
 	anekdot, err := h.services.Anekdot.GetRandomAnekdot(ctx)
 	if err != nil {
@@ -50,11 +77,26 @@ func (h *Handler) getRandomAnekdot(ctx *gin.Context) {
 	h.Response(ctx, http.StatusOK, nil, anekdot)
 }
 
+// @Summary Update rating
+// @Description value="like/dislike"
+// @Security ApiKeyAuth
+// @Tags Anekdot
+// @ID updateRating
+// @Accept json
+// @Produce json
+// @Param anekdotID path int true "anekdot ID"
+// @Param value query string true "value"
+// @Failure 500 {object} models.Response "Internal Server Error"
+// @Failure 400 {object} models.Response "Bad Request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 403 {object} models.Response "Forbidden"
+// @Success 200 {object} models.Response "OK"
+// @Router /anekdot/{anekdotID}/rating [put]
 func (h *Handler) updateRating(ctx *gin.Context) {
 	var valueStr string
 	var value int
 
-	anekdotIDstr := ctx.Param("id")
+	anekdotIDstr := ctx.Param("anekdotID")
 	anekdotID, err := strconv.Atoi(anekdotIDstr)
 	if err != nil {
 		h.Response(ctx, http.StatusBadRequest, err, "")
@@ -71,7 +113,7 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 		case "dislike":
 			value = -1
 		default:
-			h.Response(ctx, http.StatusBadRequest, errors.New("method is not like/dislike"), "")
+			h.Response(ctx, http.StatusBadRequest, errors.New("value is not like/dislike"), "")
 			return
 		}
 	}
@@ -90,8 +132,22 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 	h.Response(ctx, http.StatusOK, nil, map[string]int{"value": value})
 }
 
+// @Summary Get random by ID
+// @Description
+// @Security ApiKeyAuth
+// @Tags Anekdot
+// @ID getAnekdotByID
+// @Accept json
+// @Produce json
+// @Param anekdotID path int true "anekdot ID"
+// @Failure 500 {object} models.Response "Internal Server Error"
+// @Failure 400 {object} models.Response "Bad Request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 403 {object} models.Response "Forbidden"
+// @Success 200 {object} models.Response{resp=models.Anekdot} "OK"
+// @Router /anekdot/{anekdotID} [get]
 func (h *Handler) getAnekdotByID(ctx *gin.Context) {
-	anekdotIDstr := ctx.Param("id")
+	anekdotIDstr := ctx.Param("anekdotID")
 	anekdotID, err := strconv.Atoi(anekdotIDstr)
 	if err != nil {
 		h.Response(ctx, http.StatusBadRequest, err, "")
