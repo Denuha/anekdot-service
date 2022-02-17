@@ -13,3 +13,7 @@ up-build:
 
 up:
 	docker-compose up
+
+swagger:
+	swag fmt -d cmd/anekdot-service
+	swag init -g internal/app/app.go
