@@ -16,7 +16,7 @@ func (h *Handler) initRoutesUser(rg *gin.RouterGroup) {
 // @Summary Get user list
 // @Description
 // @Security ApiKeyAuth
-// @Tags User
+// @Tags Users
 // @ID getUserList
 // @Accept json
 // @Produce json

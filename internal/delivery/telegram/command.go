@@ -54,7 +54,7 @@ func (t *Telegram) processCommandMetrics(update *tgbotapi.Update) tgbotapi.Messa
 		return tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
 	}
 
-	message := fmt.Sprintf("Количество пользователей: %d\nКоличетсво анекдотов: %d\nКоличетсво голосований: %d",
+	message := fmt.Sprintf("Количество пользователей: %d\nКоличество анекдотов: %d\nКоличество голосований: %d",
 		metrics.NumberUsers, metrics.NumberAnekdots, metrics.NumberUserVotes)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 	return msg

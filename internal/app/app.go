@@ -35,10 +35,13 @@ import (
 // @in header
 // @name Authorization
 
-// @tag.name Anekdot
+// @tag.name Anekdots
 // @tag.description anekdot api
 
-// @tag.name User
+// @tag.name Users
+// @tag.description user api
+
+// @tag.name Metrics
 // @tag.description user api
 func Run() {
 	log := logrus.New()

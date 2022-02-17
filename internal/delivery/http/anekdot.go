@@ -21,7 +21,7 @@ func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 // @Summary Parse anekdots to db
 // @Description source="anekdotme"
 // @Security ApiKeyAuth
-// @Tags Anekdot
+// @Tags Anekdots
 // @ID parseAnekdots
 // @Accept json
 // @Produce json
@@ -57,7 +57,7 @@ func (h *Handler) parseAnekdots(ctx *gin.Context) {
 // @Summary Get random anekdot
 // @Description
 // @Security ApiKeyAuth
-// @Tags Anekdot
+// @Tags Anekdots
 // @ID getRandomAnekdot
 // @Accept json
 // @Produce json
@@ -80,7 +80,7 @@ func (h *Handler) getRandomAnekdot(ctx *gin.Context) {
 // @Summary Update rating
 // @Description value="like/dislike"
 // @Security ApiKeyAuth
-// @Tags Anekdot
+// @Tags Anekdots
 // @ID updateRating
 // @Accept json
 // @Produce json
@@ -132,10 +132,10 @@ func (h *Handler) updateRating(ctx *gin.Context) {
 	h.Response(ctx, http.StatusOK, nil, map[string]int{"value": value})
 }
 
-// @Summary Get random by ID
+// @Summary Get anekdot by ID
 // @Description
 // @Security ApiKeyAuth
-// @Tags Anekdot
+// @Tags Anekdots
 // @ID getAnekdotByID
 // @Accept json
 // @Produce json
