@@ -9,7 +9,9 @@ WORKDIR /app
 
 COPY . .
 
+RUN go get -u github.com/swaggo/swag/cmd/swag
 RUN go mod vendor
+RUN swag init -g internal/app/app.go
 
 RUN go build -o anekdot-service cmd/anekdot-service/main.go
 WORKDIR /binary

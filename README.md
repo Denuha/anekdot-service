@@ -9,10 +9,14 @@ Implemented work through telegram api and rest.
 - REST (with jwt) & Telegram
   - Get random anekdot and by ID
   - Create user
+  - Get statistics (number anekdots, users, votes)
+- OpenAPI description (http://localhost:1337/swagger/index.html)
 
 ### Starting
-1. Create .env file (watch watch.env)
-2. `make run`
+1. Create .env file (watch example.env)
+2. `go mod vendor`
+3. `make swagger`
+4. `make run`
 
 Build docker image
 
@@ -20,11 +24,10 @@ Build docker image
 
 Run docker container
 
-`docker run --env-file ./.env anekdot-service`
+`docker run -p 1337:1337 --env-file ./.env anekdot-service`
 
 `docker-compose up`
 ### TODO
-- swagger
 - give admin rules to user
 - create anekdot by user (status "Verification") (tg and REST)
 - accept or reject user anekdots by admin
@@ -33,3 +36,5 @@ Run docker container
 - unit tests
 - parse likes and dislikes from http://anekdotme.ru
 - deploy to vps
+- bot for vk.com
+- bot for discord

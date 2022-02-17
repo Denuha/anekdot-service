@@ -23,6 +23,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// @title Swagger Anekdot service
+// @version 1.0
+// @description https://github.com/Denuha/anekdot-service
+
+// @contact.name   Denuha
+// @contact.url    https://github.com/Denuha/anekdot-service
+// @contact.email  denuha@mail.ru
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @tag.name Anekdots
+// @tag.description anekdot api
+
+// @tag.name Users
+// @tag.description user api
+
+// @tag.name Metrics
+// @tag.description user api
 func Run() {
 	log := logrus.New()
 
