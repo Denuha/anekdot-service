@@ -42,4 +42,4 @@ Run docker container
 - add rating "Hmm 🤔"
 - JWT [post] /token-refresh
 - - [get] /token-expiress
-- - [post] - /reset-password
+- - [post] /reset-password
