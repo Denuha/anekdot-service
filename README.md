@@ -36,5 +36,10 @@ Run docker container
 - unit tests
 - parse likes and dislikes from http://anekdotme.ru
 - deploy to vps
-- bot for vk.com
-- bot for discord
+- bot for vk.com (delivery)
+- bot for discord (delivery)
+- secret massage:)
+- add rating "Hmm 🤔"
+- JWT [post] /token-refresh
+- - [get] /token-expiress
+- - [post] - /reset-password
