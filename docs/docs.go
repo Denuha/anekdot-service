@@ -162,7 +162,7 @@ const docTemplate_swagger = `{
                 "tags": [
                     "Anekdots"
                 ],
-                "summary": "Get random by ID",
+                "summary": "Get anekdot by ID",
                 "operationId": "getAnekdotByID",
                 "parameters": [
                     {
@@ -318,7 +318,7 @@ const docTemplate_swagger = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "OK",
                         "schema": {
                             "allOf": [
@@ -680,9 +680,6 @@ const docTemplate_swagger = `{
             "type": "object",
             "properties": {
                 "password": {
-                    "type": "string"
-                },
-                "realm": {
                     "type": "string"
                 },
                 "username": {
