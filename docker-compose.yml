@@ -19,6 +19,7 @@ services:
 
   anekdot-service:
     image: anekdot-service
+    container_name: anekdot-service
     restart: always
     ports:
       - ${PORT}:${PORT}

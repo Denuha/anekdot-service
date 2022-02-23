@@ -14,8 +14,9 @@ type User struct {
 }
 
 type UserRegistation struct {
-	UserLogin
-	Realm string `json:"realm"`
+	Username string `json:"username"`
+	Realm    string `json:"-"`
+	Password string `json:"password"`
 }
 
 type UserLogin struct {

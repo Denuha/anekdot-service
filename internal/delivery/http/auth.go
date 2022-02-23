@@ -59,7 +59,7 @@ func (h *Handler) registration(ctx *gin.Context) {
 // @Failure 400 {object} models.Response "Bad Request"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 403 {object} models.Response "Forbidden"
-// @Success 201 {object} models.Response{resp=models.Login} "OK"
+// @Success 200 {object} models.Response{resp=models.Login} "OK"
 // @Router /login [post]
 func (h *Handler) login(ctx *gin.Context) {
 	var user *models.UserLogin
