@@ -18,7 +18,7 @@ func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 
 	anekdotGroupParse := anekdotGroup.Group("/parse")
 	anekdotGroupParse.Use(h.adminVerify())
-	anekdotGroup.GET("", h.parseAnekdots)
+	anekdotGroupParse.GET("", h.parseAnekdots)
 
 }
 
