@@ -30,7 +30,7 @@ func (u *user) Registration(ctx context.Context, user *models.UserRegistation) (
 	pwd.Write([]byte(user.Password))
 	pwd.Write([]byte(u.saltPassword))
 	user.Password = fmt.Sprintf("%x", pwd.Sum(nil))
-	user.Realm = "anekdot"
+	user.Realm = "user"
 
 	return u.UserDB.CreateUser(ctx, user)
 }
