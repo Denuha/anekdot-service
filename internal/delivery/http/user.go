@@ -8,7 +8,7 @@ import (
 
 func (h *Handler) initRoutesUser(rg *gin.RouterGroup) {
 	userGroup := rg.Group("/user")
-	userGroup.Use(h.userVerify())
+	userGroup.Use(h.adminVerify())
 
 	userGroup.GET("", h.getUserList)
 }

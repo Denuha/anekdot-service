@@ -12,10 +12,14 @@ func (h *Handler) initRoutesAnekdot(rg *gin.RouterGroup) {
 	anekdotGroup := rg.Group("/anekdot")
 	anekdotGroup.Use(h.userVerify())
 
-	anekdotGroup.GET("/parse", h.parseAnekdots)
 	anekdotGroup.GET("/random", h.getRandomAnekdot)
 	anekdotGroup.GET("/:anekdotID", h.getAnekdotByID)
 	anekdotGroup.PUT("/:anekdotID/rating", h.updateRating)
+
+	anekdotGroupParse := anekdotGroup.Group("/parse")
+	anekdotGroupParse.Use(h.adminVerify())
+	anekdotGroupParse.GET("", h.parseAnekdots)
+
 }
 
 // @Summary Parse anekdots to db

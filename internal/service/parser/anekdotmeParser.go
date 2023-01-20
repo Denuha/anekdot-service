@@ -49,7 +49,7 @@ func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 				anekdotList = append(anekdotList, tmp)
 			})
 		},
-		LogDisabled: true,
+		LogDisabled: false,
 	}).Start()
 
 	return anekdotList, nil
