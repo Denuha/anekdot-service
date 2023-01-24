@@ -9,8 +9,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// callbackQueryHandler обрабатывает запрос из callback
 func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.CallbackQuery) {
 	split := strings.Split(query.Data, ":")
+
+	// Если пришел рейтинг
 	if split[0] == "rating" {
 
 		anekdotID, err := strconv.Atoi(split[1])
@@ -21,11 +24,13 @@ func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.Cal
 
 		var value int
 		valueStr := split[2]
-		switch valueStr {
-		case "like":
+		switch btnRating(valueStr) {
+		case btnRatingLike:
 			value = 1
-		case "dislike":
+		case btnRatingDislike:
 			value = -1
+		case btnRatingSkip:
+			value = 0
 		default:
 			value = 0
 		}

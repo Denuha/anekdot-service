@@ -7,7 +7,7 @@ import (
 )
 
 var DebugUser = models.User{
-	ID:         2,
+	ID:         3,
 	UserName:   "quest",
 	ExternalID: "",
 	Realm:      "anekdot",
