@@ -9,13 +9,13 @@ import (
 
 func createKeyboardRating(anekdot *models.Anekdot) tgbotapi.InlineKeyboardMarkup {
 	btnLike := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("👍 %d", anekdot.Likes),
-		fmt.Sprintf("rating:%s:%d", btnRatingLike, anekdot.ID))
+		fmt.Sprintf("rating:%d:%s", anekdot.ID, btnRatingLike))
 
 	btnDislike := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("👎 %d", anekdot.Dislikes),
-		fmt.Sprintf("rating:%s:%d", btnRatingDislike, anekdot.ID))
+		fmt.Sprintf("rating:%d:%s", anekdot.ID, btnRatingDislike))
 
 	btnSkip := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("🤨 %d", anekdot.Skips),
-		fmt.Sprintf("rating:%s:%d", btnRatingSkip, anekdot.ID))
+		fmt.Sprintf("rating:%d:%s", anekdot.ID, btnRatingSkip))
 
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 	buttons = append(buttons, btnLike, btnDislike, btnSkip)
