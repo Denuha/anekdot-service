@@ -15,7 +15,6 @@ type anekdot struct {
 	anekDB   repository.AnekdotDB
 	commonDB repository.CommonDB
 	userDB   repository.UserDB
-	utils.UtilsUser
 }
 
 func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error) {
@@ -55,7 +54,7 @@ func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error)
 }
 
 func (a *anekdot) UpdateRating(ctx context.Context, anekdotID int, value int) error {
-	user, err := a.GetUserFromContext(ctx)
+	user, err := utils.GetUserFromContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,9 +81,8 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 
 func NewAnekdotService(repos *repository.Repositories) Anekdot {
 	return &anekdot{
-		anekDB:    repos.AnekdotDB,
-		UtilsUser: utils.NewUtilsUser(),
-		commonDB:  repos.CommonDB,
-		userDB:    repos.UserDB,
+		anekDB:   repos.AnekdotDB,
+		commonDB: repos.CommonDB,
+		userDB:   repos.UserDB,
 	}
 }

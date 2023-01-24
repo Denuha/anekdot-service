@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/Denuha/anekdot-service/internal/models"
+	"github.com/Denuha/anekdot-service/internal/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -48,7 +49,7 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 			}
 
 			ctx := context.Background()
-			ctx, err = t.userUtls.PutUserToContext(ctx, userDB)
+			ctx, err = utils.PutUserToContext(ctx, userDB)
 			if err != nil {
 				log.Println(err)
 			}
