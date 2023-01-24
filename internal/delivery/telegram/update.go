@@ -16,7 +16,13 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 		if update.Message != nil {
 			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
 
-			_, err := t.getSender(&update)
+			userDB, err := t.getSender(&update)
+			if err != nil {
+				log.Println(err)
+			}
+
+			ctx := context.Background()
+			ctx, err = utils.PutUserToContext(ctx, userDB)
 			if err != nil {
 				log.Println(err)
 			}
@@ -25,17 +31,17 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 
 			switch update.Message.Text {
 			case "/start":
-				msg = t.processCommandStart(&update)
+				msg = t.processCommandStart(ctx, &update)
 			case "/random":
-				msg = t.processCommandRandom(&update)
+				msg = t.processCommandRandom(ctx, &update)
 			case "/help":
-				msg = t.processCommandHelp(&update)
+				msg = t.processCommandHelp(ctx, &update)
 			case "/metrics":
-				msg = t.processCommandMetrics(&update)
+				msg = t.processCommandMetrics(ctx, &update)
 			case "/test":
 				msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Тест ОК")
 			default:
-				msg = t.processCommandUnknown(&update)
+				msg = t.processCommandUnknown(ctx, &update)
 			}
 			bot.Send(msg)
 		}
