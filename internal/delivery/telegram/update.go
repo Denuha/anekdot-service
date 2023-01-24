@@ -63,13 +63,13 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 
 // getSender Получает отправителя и добавляет его в локальную БД
 func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
-	var tgUSer *tgbotapi.User
+	var tgUser *tgbotapi.User
 
 	if update.Message != nil {
-		tgUSer = update.Message.From
+		tgUser = update.Message.From
 	}
 	if update.CallbackQuery != nil {
-		tgUSer = update.CallbackQuery.From
+		tgUser = update.CallbackQuery.From
 	}
 
 	ctx := context.Background()
@@ -88,8 +88,8 @@ func (t *Telegram) getSender(update *tgbotapi.Update) (*models.User, error) {
 	}
 
 	user := models.User{
-		UserName:   tgUSer.String(),
-		ExternalID: strconv.Itoa(int(tgUSer.ID)),
+		UserName:   tgUser.String(),
+		ExternalID: strconv.Itoa(int(tgUser.ID)),
 		Realm:      "tg",
 		ChatID:     chatID,
 	}
