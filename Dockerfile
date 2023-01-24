@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/swaggo/swag/cmd/swag@v1.7.9
 #RUN go get -u github.com/swaggo/swag/cmd/swag
 RUN go mod vendor
 RUN swag init -g internal/app/app.go

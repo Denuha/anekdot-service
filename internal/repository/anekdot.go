@@ -57,7 +57,7 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 		return nil, err
 	}
 
-	anekdot, err := a.getAnekdot(ctx, cl, anekdotID)
+	anekdot, err := a.getAnekdot(ctx, cl, anekdotID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,9 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 	return anekdot, nil
 }
 
-func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int) (*models.Anekdot, error) {
+// getAnekdot возвращает анекдот по ИД или случайный.
+// Если user != nil, тогда пользователь получит анекдот, за который не голосовал
+func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int, user *models.User) (*models.Anekdot, error) {
 	querySelect := sq.Select(`a.id`, `a."text"`, `a.external_id`, `a.create_time`, `a.status`, `a.sender_id`, `s."name"`).
 		From(`anekdot.anekdot a`).
 		Join(`anekdot.sender s ON a.sender_id=s.id`)
@@ -77,12 +79,17 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int) (*m
 			return nil, err
 		}
 
-		querySelect = querySelect.LeftJoin(`anekdot.user_votes uv on uv.anekdot_id = a.id`).
-			Where(sq.Or{
-				sq.NotEq{`uv.user_id`: user.ID},
-				sq.Eq{`uv.user_id`: nil},
-			},
-			)
+		querySelect = querySelect.LeftJoin(`anekdot.user_votes uv on uv.anekdot_id = a.id`)
+		or := sq.Or{
+			sq.Eq{`uv.user_id`: nil}, // анекдоты, у которых нет голосов
+		}
+
+		if user == nil {
+			or = append(or,
+				sq.NotEq{`uv.user_id`: user.ID}) // исключение анекдотов, за которые голосовал пользователь
+		}
+
+		querySelect = querySelect.Where(or)
 
 		querySelect = querySelect.OrderBy(`random()`).Limit(1)
 	} else {
@@ -130,12 +137,12 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int) (*m
 	return &anekdot, nil
 }
 
-func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
+func (a *anekdot) GetRandomAnekdot(ctx context.Context, user *models.User) (*models.Anekdot, error) {
 	cl, err := a.client.GetClient()
 	if err != nil {
 		return nil, err
 	}
-	anekdot, err := a.getAnekdot(ctx, cl, 0)
+	anekdot, err := a.getAnekdot(ctx, cl, 0, user)
 	if err != nil {
 		return nil, err
 	}

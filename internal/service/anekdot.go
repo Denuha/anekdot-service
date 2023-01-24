@@ -46,7 +46,11 @@ func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error)
 }
 
 func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
-	anekdot, err := a.anekDB.GetRandomAnekdot(ctx)
+	user, err := utils.GetUserFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	anekdot, err := a.anekDB.GetRandomAnekdot(ctx, user)
 	if err != nil {
 		return nil, err
 	}
