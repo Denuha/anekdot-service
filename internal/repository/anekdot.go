@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	sq "github.com/Masterminds/squirrel"
@@ -12,6 +13,12 @@ import (
 
 type anekdot struct {
 	client clientRepo.PostgresClient
+}
+
+func NewAnekdotRepo(client clientRepo.PostgresClient) AnekdotDB {
+	return &anekdot{
+		client: client,
+	}
 }
 
 func (a *anekdot) InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) error {
@@ -44,26 +51,38 @@ func (a *anekdot) InsertAnekdotList(ctx context.Context, anekdotList []models.An
 }
 
 func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error) {
-	querySelect := `
-	SELECT a.id, a."text", a.external_id, a.create_time, a.status, a.sender_id, s."name",
-		(SELECT count(u.value) 
-				FROM anekdot.user_votes u
-				WHERE u.anekdot_id= a.id AND u.value > 0) AS likes ,
-		(SELECT count(u.value) 
-				FROM anekdot.user_votes u
-				WHERE u.anekdot_id= a.id AND u.value < 0) AS dislikes 
-	FROM anekdot.anekdot a
-	LEFT JOIN anekdot.sender s ON a.sender_id=s.id 
-	WHERE a.id = $1;`
-
 	cl, err := a.client.GetClient()
 	if err != nil {
 		return nil, err
 	}
 
-	row := cl.QueryRowContext(ctx, querySelect, anekdotID)
+	anekdot, err := a.getAnekdot(ctx, cl, anekdotID)
+	if err != nil {
+		return nil, err
+	}
+
+	return anekdot, nil
+}
+
+func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int) (*models.Anekdot, error) {
+	querySelect := sq.Select(`a.id`, `a."text"`, `a.external_id`, `a.create_time`, `a.status`, `a.sender_id`, `s."name"`).
+		From(`anekdot.anekdot a`).
+		LeftJoin(`anekdot.sender s ON a.sender_id=s.id`)
+
+	if anekdotID == 0 {
+		// random anekdot
+		querySelect = querySelect.OrderBy(`random()`).Limit(1)
+	} else {
+		querySelect = querySelect.Where(sq.Eq{"a.id": anekdotID})
+	}
+
+	query, args, err := querySelect.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return nil, err
+	}
 
 	var anekdot models.Anekdot
+	row := tx.QueryRowContext(ctx, query, args...)
 	err = row.Scan(
 		&anekdot.ID,
 		&anekdot.Text,
@@ -72,56 +91,43 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 		&anekdot.Status,
 		&anekdot.Sender.ID,
 		&anekdot.Sender.Name,
-		&anekdot.Likes,
-		&anekdot.Dislikes,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
+	likes, err := a.getCountLikes(ctx, tx, anekdotID)
+	if err != nil {
+		return nil, err
+	}
+
+	dislikes, err := a.getCountDisLikes(ctx, tx, anekdotID)
+	if err != nil {
+		return nil, err
+	}
+
+	skips, err := a.getCountSkips(ctx, tx, anekdotID)
+	if err != nil {
+		return nil, err
+	}
+
+	anekdot.Likes = likes
+	anekdot.Dislikes = dislikes
+	anekdot.Skips = skips
 	return &anekdot, nil
 }
 
 func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
-	querySelect := `
-	SELECT a.id, a."text", a.external_id, a.create_time, a.status, a.sender_id, s."name",  
-	(SELECT count(u.value) 
-			FROM anekdot.user_votes u
-			WHERE u.anekdot_id= a.id AND u.value > 0) AS likes ,
-	(SELECT count(u.value) 
-			FROM anekdot.user_votes u
-			WHERE u.anekdot_id= a.id AND u.value < 0) AS dislikes 
-	FROM anekdot.anekdot a
-	LEFT JOIN anekdot.sender s ON a.sender_id=s.id
-	LEFT JOIN anekdot.user_votes u ON a.id=u.anekdot_id
-	ORDER BY random() limit 1`
-
 	cl, err := a.client.GetClient()
 	if err != nil {
 		return nil, err
 	}
-
-	row := cl.QueryRowContext(ctx, querySelect)
-
-	var anekdot models.Anekdot
-	err = row.Scan(
-		&anekdot.ID,
-		&anekdot.Text,
-		&anekdot.ExternalID,
-		&anekdot.CreateTime,
-		&anekdot.Status,
-		&anekdot.Sender.ID,
-		&anekdot.Sender.Name,
-		&anekdot.Likes,
-		&anekdot.Dislikes,
-	)
-
+	anekdot, err := a.getAnekdot(ctx, cl, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	return &anekdot, nil
+	return anekdot, nil
 }
 
 func (a *anekdot) GetUserVoteByAnekdotID(ctx context.Context, anekdotID int, userID int64) (*models.AnekdotVote, error) {
@@ -189,8 +195,80 @@ func (a *anekdot) PostUserVoteByAnekdotID(ctx context.Context, anekdotID int, us
 	return nil
 }
 
-func NewAnekdotRepo(client clientRepo.PostgresClient) AnekdotDB {
-	return &anekdot{
-		client: client,
+// getCountLikes get count rating > 0
+func (a *anekdot) getCountLikes(ctx context.Context, tx *sql.DB, anekdotID int) (int, error) {
+	querySelect := sq.Select(`count(u.value)`).
+		From(`anekdot.user_votes u`).
+		Where(sq.And{
+			sq.Eq{"u.anekdot_id": anekdotID},
+			sq.Gt{"u.value": 0},
+		})
+
+	query, args, err := querySelect.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return 0, err
 	}
+
+	countLikes := 0
+	row := tx.QueryRowContext(ctx, query, args...)
+	err = row.Scan(
+		&countLikes,
+	)
+	if err != nil {
+		return 0, nil
+	}
+
+	return countLikes, nil
+}
+
+// getCountLikes get count rating < 0
+func (a *anekdot) getCountDisLikes(ctx context.Context, tx *sql.DB, anekdotID int) (int, error) {
+	querySelect := sq.Select(`count(u.value)`).
+		From(`anekdot.user_votes u`).
+		Where(sq.And{
+			sq.Eq{"u.anekdot_id": anekdotID},
+			sq.Lt{"u.value": 0},
+		})
+
+	query, args, err := querySelect.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	countDisLikes := 0
+	row := tx.QueryRowContext(ctx, query, args...)
+	err = row.Scan(
+		&countDisLikes,
+	)
+	if err != nil {
+		return 0, nil
+	}
+
+	return countDisLikes, nil
+}
+
+// getCountLikes get count rating = 0
+func (a *anekdot) getCountSkips(ctx context.Context, tx *sql.DB, anekdotID int) (int, error) {
+	querySelect := sq.Select(`count(u.value)`).
+		From(`anekdot.user_votes u`).
+		Where(sq.And{
+			sq.Eq{"u.anekdot_id": anekdotID},
+			sq.Eq{"u.value": 0},
+		})
+
+	query, args, err := querySelect.PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	countSkips := 0
+	row := tx.QueryRowContext(ctx, query, args...)
+	err = row.Scan(
+		&countSkips,
+	)
+	if err != nil {
+		return 0, nil
+	}
+
+	return countSkips, nil
 }

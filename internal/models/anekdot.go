@@ -7,6 +7,7 @@ type Anekdot struct {
 	Sender       Sender    `json:"sender"`
 	Text         string    `json:"text"`
 	Likes        int       `json:"likes"`
+	Skips        int       `json:"skips"` // count raiting 0
 	Dislikes     int       `json:"dislikes"`
 	ExternalID   string    `json:"external_id"`
 	CreateTime   time.Time `json:"create_time"`

@@ -21,11 +21,13 @@ func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.Cal
 
 		var value int
 		valueStr := split[2]
-		switch valueStr {
-		case "like":
+		switch btnRating(valueStr) {
+		case btnRatingLike:
 			value = 1
-		case "dislike":
+		case btnRatingDislike:
 			value = -1
+		case btnRatingSkip:
+			value = 0
 		default:
 			value = 0
 		}
