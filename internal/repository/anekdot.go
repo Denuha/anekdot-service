@@ -9,7 +9,6 @@ import (
 
 	"github.com/Denuha/anekdot-service/internal/models"
 	clientRepo "github.com/Denuha/anekdot-service/internal/repository/client"
-	"github.com/Denuha/anekdot-service/internal/utils"
 )
 
 type anekdot struct {
@@ -74,22 +73,15 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int, use
 
 	if anekdotID == 0 {
 		// random anekdot
-		user, err := utils.GetUserFromContext(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		querySelect = querySelect.LeftJoin(`anekdot.user_votes uv on uv.anekdot_id = a.id`)
-		or := sq.Or{
-			sq.Eq{`uv.user_id`: nil}, // анекдоты, у которых нет голосов
-		}
-
 		if user != nil {
-			or = append(or,
-				sq.NotEq{`uv.user_id`: user.ID}) // исключение анекдотов, за которые голосовал пользователь
-		}
+			querySelect = querySelect.LeftJoin(`anekdot.user_votes uv on uv.anekdot_id = a.id`)
+			or := sq.Or{
+				sq.Eq{`uv.user_id`: nil},        // анекдоты, у которых нет голосов
+				sq.NotEq{`uv.user_id`: user.ID}, // исключение анекдотов, за которые голосовал пользователь
+			}
 
-		querySelect = querySelect.Where(or)
+			querySelect = querySelect.Where(or)
+		}
 
 		querySelect = querySelect.OrderBy(`random()`).Limit(1)
 	} else {
