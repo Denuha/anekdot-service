@@ -84,7 +84,7 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int, use
 			sq.Eq{`uv.user_id`: nil}, // анекдоты, у которых нет голосов
 		}
 
-		if user == nil {
+		if user != nil {
 			or = append(or,
 				sq.NotEq{`uv.user_id`: user.ID}) // исключение анекдотов, за которые голосовал пользователь
 		}
