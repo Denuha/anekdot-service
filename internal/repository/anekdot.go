@@ -74,13 +74,7 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int, use
 	if anekdotID == 0 {
 		// random anekdot
 		if user != nil {
-			querySelect = querySelect.LeftJoin(`anekdot.user_votes uv on uv.anekdot_id = a.id`)
-			or := sq.Or{
-				sq.Eq{`uv.user_id`: nil},        // анекдоты, у которых нет голосов
-				sq.NotEq{`uv.user_id`: user.ID}, // исключение анекдотов, за которые голосовал пользователь
-			}
-
-			querySelect = querySelect.Where(or)
+			querySelect = querySelect.Where("a.id not in (select uv.anekdot_id from anekdot.user_votes uv where uv.user_id = ?)", user.ID)
 		}
 
 		querySelect = querySelect.OrderBy(`random()`).Limit(1)
@@ -107,6 +101,7 @@ func (a *anekdot) getAnekdot(ctx context.Context, tx *sql.DB, anekdotID int, use
 	if err != nil {
 		return nil, err
 	}
+	anekdotID = anekdot.ID
 
 	likes, err := a.getCountLikes(ctx, tx, anekdotID)
 	if err != nil {

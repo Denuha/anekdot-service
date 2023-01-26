@@ -44,7 +44,7 @@ func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.Cal
 	}
 }
 
-// callback на like/dislike
+// callback на like/dislike/skip
 func (t *Telegram) callbackRating(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
 	anekdot, err := t.services.Anekdot.GetRandomAnekdot(ctx)
 	if err != nil {
