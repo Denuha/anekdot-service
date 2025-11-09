@@ -22,10 +22,10 @@ services:
     container_name: anekdot-service
     restart: always
     ports:
-      - 1337:1337
+      - ${PORT}:${PORT}
     env_file: .env
-    depends_on:
-      - postgres-anekdot-service
+    # depends_on:
+    #   - postgres-anekdot-service
     networks:
       - mynet
     build:
