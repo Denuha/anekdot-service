@@ -66,7 +66,7 @@ func Run() {
 	pgClient := client.NewPostgresClient(db)
 	repos := repository.NewRepositories(pgClient)
 	services := service.NewServices(cfg, repos, log)
-	auth := auth.NewAuth(cfg, &repos.UserDB)
+	auth := auth.NewAuth(cfg, repos)
 	handlers := httpDelivery.NewHandlers(services, log, cfg, auth)
 	tgDelivery := tgDelivery.NewTelegramDelivery(services, log, repos)
 

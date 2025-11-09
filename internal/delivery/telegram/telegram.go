@@ -10,15 +10,15 @@ type Telegram struct {
 	services *service.Services
 	log      *logrus.Logger
 
-	CommonDB repository.CommonDB
-	UserDB   repository.UserDB
+	CommonDB repository.Common
+	UserDB   repository.User
 }
 
 func NewTelegramDelivery(services *service.Services, log *logrus.Logger, repos *repository.Repositories) *Telegram {
 	return &Telegram{
 		services: services,
 		log:      log,
-		CommonDB: repos.CommonDB,
-		UserDB:   repos.UserDB,
+		CommonDB: repos.Common,
+		UserDB:   repos.User,
 	}
 }

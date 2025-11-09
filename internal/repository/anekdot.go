@@ -15,7 +15,7 @@ type anekdot struct {
 	client clientRepo.PostgresClient
 }
 
-func NewAnekdotRepo(client clientRepo.PostgresClient) AnekdotDB {
+func NewAnekdotRepo(client clientRepo.PostgresClient) Anekdot {
 	return &anekdot{
 		client: client,
 	}

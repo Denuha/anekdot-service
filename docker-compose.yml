@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   postgres-anekdot-service:
-    image: postgres
+    image: postgres:alpine
     container_name: postgres-anekdot-service
     restart: always
     networks:
@@ -22,7 +22,7 @@ services:
     container_name: anekdot-service
     restart: always
     ports:
-      - ${PORT}:${PORT}
+      - 1337:1337
     env_file: .env
     depends_on:
       - postgres-anekdot-service
