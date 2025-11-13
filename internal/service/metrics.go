@@ -8,7 +8,7 @@ import (
 )
 
 type metrics struct {
-	metricsDB repository.MetricsDB
+	metricsDB repository.Metrics
 }
 
 func (m *metrics) GetMetrics(ctx context.Context) (*models.Metrics, error) {
@@ -17,6 +17,6 @@ func (m *metrics) GetMetrics(ctx context.Context) (*models.Metrics, error) {
 
 func NewMetricsService(repos *repository.Repositories) Metrics {
 	return &metrics{
-		metricsDB: repos.MetricsDB,
+		metricsDB: repos.Metrics,
 	}
 }

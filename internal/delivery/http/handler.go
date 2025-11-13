@@ -37,9 +37,9 @@ func (h *Handler) Init() *gin.Engine {
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	swag.SwaggerInfo_swagger.BasePath = h.cfg.SwaggerBasePath
-	swag.SwaggerInfo_swagger.Host = h.cfg.SwaggerHost
-	swag.SwaggerInfo_swagger.Version = h.cfg.SwaggerVersion
+	swag.SwaggerInfo.BasePath = h.cfg.SwaggerBasePath
+	swag.SwaggerInfo.Host = h.cfg.SwaggerHost
+	swag.SwaggerInfo.Version = h.cfg.SwaggerVersion
 
 	return router
 }

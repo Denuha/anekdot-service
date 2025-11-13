@@ -2,14 +2,13 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
+	"github.com/Denuha/anekdot-service/internal/auth/token"
 	"github.com/Denuha/anekdot-service/internal/config"
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/repository"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,10 +20,22 @@ type Auth struct {
 	saltPassword string
 	signedKey    string
 	tokenExpires time.Duration
-	UserDB       repository.UserDB
+	UserDB       repository.User
+	SessionDB    repository.Session
 }
 
-// GetUserFromRequest return user from DB
+func NewAuth(cfg *config.Config, repos *repository.Repositories) *Auth {
+	return &Auth{
+		saltPassword: cfg.UserPasswordSalt,
+		tokenExpires: cfg.TokenExpires,
+		signedKey:    cfg.TokenSignedKey,
+		UserDB:       repos.User,
+		SessionDB:    repos.Session,
+	}
+}
+
+// GetUserFromRequest return user from DB.
+// Check token and session.
 func (a *Auth) GetUserFromRequest(ctx *gin.Context) (*models.User, error) {
 	authHeader := ctx.GetHeader("Authorization")
 	if authHeader == "" {
@@ -40,39 +51,20 @@ func (a *Auth) GetUserFromRequest(ctx *gin.Context) (*models.User, error) {
 		return nil, errors.New("auth method is not Bearer")
 	}
 
-	claims, err := ParseToken(headerParts[1], []byte(a.signedKey))
+	accessToken := headerParts[1]
+
+	claims, err := token.ParseToken(accessToken, []byte(a.signedKey))
 	if err != nil {
 		return nil, err
+	}
+
+	session, err := a.SessionDB.GetSession(ctx, claims.ID)
+	if err != nil {
+		return nil, errors.New("no access")
+	}
+	if session.AccessToken != accessToken {
+		return nil, errors.New("no access")
 	}
 
 	return a.UserDB.GetUserByID(ctx, claims.ID)
-}
-
-func ParseToken(accessToken string, signedKey []byte) (*models.Claims, error) {
-	token, err := jwt.ParseWithClaims(
-		accessToken, &models.Claims{}, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return signedKey, nil
-		})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if claims, ok := token.Claims.(*models.Claims); ok && token.Valid {
-		return claims, nil
-	}
-
-	return nil, ErrInvalidAccessToken
-}
-
-func NewAuth(cfg *config.Config, userDB *repository.UserDB) *Auth {
-	return &Auth{
-		saltPassword: cfg.UserPasswordSalt,
-		tokenExpires: cfg.TokenExpires,
-		signedKey:    cfg.TokenSignedKey,
-		UserDB:       *userDB,
-	}
 }

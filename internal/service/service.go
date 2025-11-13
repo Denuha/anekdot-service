@@ -13,6 +13,7 @@ type Services struct {
 	Anekdot Anekdot
 	User    User
 	Metrics Metrics
+	Auth    Auth
 }
 
 type Anekdot interface {
@@ -24,9 +25,14 @@ type Anekdot interface {
 }
 
 type User interface {
-	GetUserList(ctx context.Context) ([]models.User, error)
 	Registration(ctx context.Context, user *models.UserRegistation) (int, error)
-	Login(ctx context.Context, user *models.UserLogin) (string, error)
+	GetUserList(ctx context.Context) ([]models.User, error)
+}
+
+type Auth interface {
+	Login(ctx context.Context, user *models.UserLogin) (*models.Login, error)
+	Logout(ctx context.Context, accessToken string) error
+	RefreshToken(ctx context.Context, refreshToken string) (*models.Login, error)
 }
 
 type Metrics interface {
@@ -38,5 +44,6 @@ func NewServices(cfg *config.Config, repos *repository.Repositories, log *logrus
 		Anekdot: NewAnekdotService(repos),
 		User:    NewUserService(repos, cfg),
 		Metrics: NewMetricsService(repos),
+		Auth:    NewAuth(repos, cfg),
 	}
 }

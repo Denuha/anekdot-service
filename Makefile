@@ -19,7 +19,7 @@ swagger:
 	swag init -g internal/app/app.go
 
 install-tools:
-	go install github.com/swaggo/swag/cmd/swag@latest
+	go install github.com/swaggo/swag/cmd/swag@1.8.12
 
 # docker-logs.sh: first arg is number last rows
 docker-logs:

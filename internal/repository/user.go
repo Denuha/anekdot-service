@@ -13,6 +13,11 @@ type userDB struct {
 	client clientRepo.PostgresClient
 }
 
+func NewUserRepo(client clientRepo.PostgresClient) User {
+	return &userDB{
+		client: client}
+}
+
 func (u *userDB) InsertUser(ctx context.Context, tx *sql.Tx, userInsert *models.User) (*models.User, error) {
 	const queryInsertUser = `INSERT INTO anekdot.user ("username", external_id, realm, chat_id)
 	VALUES ($1, $2, $3, $4)
@@ -187,9 +192,4 @@ func (u userDB) UpdateChatID(ctx context.Context, tx *sql.Tx, userID int64, chat
 	}
 
 	return nil
-}
-
-func NewUserRepo(client clientRepo.PostgresClient) UserDB {
-	return &userDB{
-		client: client}
 }

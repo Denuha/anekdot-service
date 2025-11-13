@@ -29,7 +29,7 @@ func (c *commonDBRepo) CommitTransaction(_ context.Context, tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func NewCommonRepo(postgresClient clientRepo.PostgresClient) CommonDB {
+func NewCommonRepo(postgresClient clientRepo.PostgresClient) Common {
 	return &commonDBRepo{
 		PostgresClient: postgresClient,
 	}

@@ -38,7 +38,7 @@ func (m *metrics) GetMetrics(ctx context.Context) (*models.Metrics, error) {
 	return &metrics, nil
 }
 
-func NewMetricsRepo(client clientRepo.PostgresClient) MetricsDB {
+func NewMetricsRepo(client clientRepo.PostgresClient) Metrics {
 	return &metrics{
 		client: client,
 	}

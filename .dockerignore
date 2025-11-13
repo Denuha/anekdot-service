@@ -1,0 +1,10 @@
+.env
+Makefile
+README.md
+tools/
+docs/
+.git
+.gitignore
+docker-compose*
+Dockerfile*
+example.env

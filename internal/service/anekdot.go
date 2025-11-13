@@ -12,9 +12,9 @@ import (
 )
 
 type anekdot struct {
-	anekDB   repository.AnekdotDB
-	commonDB repository.CommonDB
-	userDB   repository.UserDB
+	anekDB   repository.Anekdot
+	commonDB repository.Common
+	userDB   repository.User
 }
 
 func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error) {
@@ -85,8 +85,8 @@ func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.An
 
 func NewAnekdotService(repos *repository.Repositories) Anekdot {
 	return &anekdot{
-		anekDB:   repos.AnekdotDB,
-		commonDB: repos.CommonDB,
-		userDB:   repos.UserDB,
+		anekDB:   repos.Anekdot,
+		commonDB: repos.Common,
+		userDB:   repos.User,
 	}
 }

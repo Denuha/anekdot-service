@@ -27,6 +27,8 @@ Run docker container
 `docker run -p 1337:1337 --env-file ./.env anekdot-service`
 
 `docker-compose up`
+`sudo docker-compose --env-file .env up`
+
 ### TODO
 - give admin rules to user
 - create anekdot by user (status "Verification") (tg and REST)
@@ -40,6 +42,4 @@ Run docker container
 - bot for discord (delivery)
 - secret massage:)
 - add rating "Hmm 🤔"
-- JWT [post] /token-refresh
-- - [get] /token-expiress
-- - [post] /reset-password
+- - JWT [post]
