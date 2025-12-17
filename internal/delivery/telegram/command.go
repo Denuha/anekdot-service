@@ -38,7 +38,7 @@ func (t *Telegram) processCommandUnknown(ctx context.Context, update *tgbotapi.U
 func (t *Telegram) processCommandMetrics(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
 	metrics, err := t.services.Metrics.GetMetrics(ctx)
 	if err != nil {
-		t.log.Println(err)
+		t.log.Errorln(err)
 		return tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
 	}
 

@@ -18,7 +18,7 @@ func (t *Telegram) callbackMsg(ctx context.Context, query *tgbotapi.CallbackQuer
 	}
 	anekdotID, err := strconv.Atoi(split[1])
 	if err != nil {
-		t.log.Println(err)
+		t.log.Errorln(err)
 		return nil
 	}
 
