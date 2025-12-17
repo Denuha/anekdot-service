@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/utils"
@@ -13,8 +14,9 @@ import (
 
 func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotapi.BotAPI) {
 	for update := range *updates {
+		start := time.Now()
 		if update.Message != nil {
-			log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
+			t.log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
 
 			userDB, err := t.getSender(&update)
 			if err != nil {
@@ -47,23 +49,27 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 		}
 
 		if update.CallbackQuery != nil {
-			log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
+			t.log.Printf("[%s] callback %s", update.CallbackQuery.From.String(), update.CallbackQuery.Data)
 
 			userDB, err := t.getSender(&update)
 			if err != nil {
-				log.Println(err)
+				t.log.Errorln(err)
 			}
 
 			ctx := context.Background()
 			ctx, err = utils.PutUserToContext(ctx, userDB)
 			if err != nil {
-				log.Println(err)
+				t.log.Errorln(err)
 			}
 
-			t.callbackQueryHandler(ctx, update.CallbackQuery)
-			msg := t.callbackRating(ctx, &update)
-			bot.Send(msg)
+			updateMsg := t.callbackMsg(ctx, update.CallbackQuery)
+			bot.Send(updateMsg)
+
+			newMsg := t.anekMsg(ctx, update.CallbackQuery.Message.Chat.ID)
+			bot.Send(newMsg)
 		}
+
+		t.log.Println("time request", time.Since(start))
 	}
 }
 

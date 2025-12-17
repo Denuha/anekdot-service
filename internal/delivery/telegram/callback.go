@@ -2,56 +2,68 @@ package telegram
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-// callbackQueryHandler обрабатывает запрос из callback
-func (t *Telegram) callbackQueryHandler(ctx context.Context, query *tgbotapi.CallbackQuery) {
+// callbackMsg изменяет рейтинг и возвращает новое сообщение для изменения клавиатуры
+func (t *Telegram) callbackMsg(ctx context.Context, query *tgbotapi.CallbackQuery) (updateMsg tgbotapi.EditMessageReplyMarkupConfig) {
 	split := strings.Split(query.Data, ":")
 
-	// Если пришел рейтинг
-	if split[0] == "rating" {
-
-		anekdotID, err := strconv.Atoi(split[1])
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		var value int
-		valueStr := split[2]
-		switch btnRating(valueStr) {
-		case btnRatingLike:
-			value = 1
-		case btnRatingDislike:
-			value = -1
-		case btnRatingSkip:
-			value = 0
-		default:
-			value = 0
-		}
-
-		err = t.services.Anekdot.UpdateRating(ctx, anekdotID, value)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+	// Если пришел не рейтинг
+	if split[0] != "rating" {
 		return
 	}
+	anekdotID, err := strconv.Atoi(split[1])
+	if err != nil {
+		t.log.Errorln(err)
+		return
+	}
+
+	var value int
+	valueStr := split[2]
+	switch btnRating(valueStr) {
+	case btnRatingLike:
+		value = 1
+	case btnRatingDislike:
+		value = -1
+	case btnRatingSkip:
+		value = 0
+	default:
+		value = 0
+	}
+
+	err = t.services.Anekdot.UpdateRating(ctx, anekdotID, value)
+	if err != nil {
+		t.log.Errorln(err)
+		return
+	}
+
+	anekdot, err := t.services.Anekdot.GetAnekdotByID(ctx, anekdotID)
+	if err != nil {
+		t.log.Errorln(err)
+		return
+	}
+	replyMarkupUpdate := createKeyboardRating(anekdot)
+	updateMsg = tgbotapi.NewEditMessageReplyMarkup(
+		query.Message.Chat.ID,
+		query.Message.MessageID,
+		replyMarkupUpdate,
+	)
+
+	return updateMsg
 }
 
-// callback на like/dislike/skip
-func (t *Telegram) callbackRating(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
+// anekMsg анекдот и клавиатура с голосами
+func (t *Telegram) anekMsg(ctx context.Context, chatID int64) tgbotapi.MessageConfig {
 	anekdot, err := t.services.Anekdot.GetRandomAnekdot(ctx)
 	if err != nil {
-		t.log.Println(err)
+		t.log.Errorln(err)
 	}
 	message := anekdot.Text
-	msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, message)
+	msg := tgbotapi.NewMessage(chatID, message)
 	msg.ReplyMarkup = createKeyboardRating(anekdot)
 
 	return msg

@@ -19,7 +19,7 @@ type Repositories struct {
 }
 
 type Anekdot interface {
-	InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) error
+	InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) (int64, error)
 	GetRandomAnekdot(ctx context.Context, user *models.User) (*models.Anekdot, error)
 	GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error)
 

@@ -9,6 +9,7 @@ import (
 	"github.com/Denuha/anekdot-service/internal/repository"
 	"github.com/Denuha/anekdot-service/internal/service/parser"
 	"github.com/Denuha/anekdot-service/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 type anekdot struct {
@@ -34,15 +35,16 @@ func (a *anekdot) ParseAnekdots(ctx context.Context, source string) (int, error)
 		return 0, err
 	}
 	if len(anekdots) == 0 {
-		return 0, errors.New("parse 0 anekdots")
+		logrus.Println("parsed 0 anekdots")
+		return 0, nil
 	}
 
-	err = a.anekDB.InsertAnekdotList(ctx, anekdots)
+	inserted, err := a.anekDB.InsertAnekdotList(ctx, anekdots)
 	if err != nil {
 		return 0, err
 	}
 
-	return len(anekdots), nil
+	return int(inserted), nil
 }
 
 func (a *anekdot) GetRandomAnekdot(ctx context.Context) (*models.Anekdot, error) {
