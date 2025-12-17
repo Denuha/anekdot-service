@@ -21,33 +21,31 @@ func NewAnekdotRepo(client clientRepo.PostgresClient) Anekdot {
 	}
 }
 
-func (a *anekdot) InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) error {
+func (a *anekdot) InsertAnekdotList(ctx context.Context, anekdotList []models.Anekdot) (int64, error) {
 	queryInsert := sq.Insert("anekdot.anekdot").Columns("text", "status", "external_id", "sender_id")
 
 	for _, anekdot := range anekdotList {
 		queryInsert = queryInsert.Values(anekdot.Text, anekdot.Status, anekdot.ExternalID, anekdot.Sender.ID)
 	}
 
+	queryInsert = queryInsert.Suffix(`ON CONFLICT (external_id,sender_id) DO NOTHING`)
+
 	query, args, err := queryInsert.PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	cl, err := a.client.GetClient()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	result, err := cl.ExecContext(ctx, query, args...)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	if aff, _ := result.RowsAffected(); aff < 1 {
-		return errors.New("affected 0")
-	}
-
-	return nil
+	return result.RowsAffected()
 }
 
 func (a *anekdot) GetAnekdotByID(ctx context.Context, anekdotID int) (*models.Anekdot, error) {

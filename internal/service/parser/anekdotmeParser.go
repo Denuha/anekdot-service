@@ -2,6 +2,8 @@ package parser
 
 import (
 	"log"
+	"math/rand"
+	"strconv"
 	"strings"
 
 	"github.com/Denuha/anekdot-service/internal/models"
@@ -19,8 +21,21 @@ type ParserAnekdotme struct {
 func (p *ParserAnekdotme) ParseAnekdots() ([]models.Anekdot, error) {
 	anekdotList := make([]models.Anekdot, 0)
 
+	var urls = []string{
+		// "http://anekdotme.ru/random",
+		// "http://anekdotme.ru/lenta",
+		"http://anekdotme.ru/lenta/page_" + strconv.Itoa(rand.Intn(750)+1),
+		// "http://anekdotme.ru/lenta/page_" + strconv.Itoa(rand.Intn(750)+1),
+		// "http://anekdotme.ru/lenta/page_" + strconv.Itoa(rand.Intn(750)+1),
+		// "http://anekdotme.ru/lenta/page_" + strconv.Itoa(rand.Intn(750)+1),
+		// "http://anekdotme.ru/anekdoti_pro-chukchu",
+		// "http://anekdotme.ru/anekdoti_pro-kino",
+		// "http://anekdotme.ru/anekdoti_pro-studentov",
+		// "http://anekdotme.ru/anekdoti_cherniy-yumor",
+	}
+
 	geziyor.NewGeziyor(&geziyor.Options{
-		StartURLs: []string{"http://anekdotme.ru/random"},
+		StartURLs: urls,
 		ParseFunc: func(g *geziyor.Geziyor, r *client.Response) {
 			r.HTMLDoc.Find("div.anekdot").Each(func(i int, s *goquery.Selection) {
 				text := s.Find("div.anekdot_text").Text()
