@@ -17,19 +17,7 @@ func (t *Telegram) processCommandStart(ctx context.Context, update *tgbotapi.Upd
 
 // /random
 func (t *Telegram) processCommandRandom(ctx context.Context, update *tgbotapi.Update) tgbotapi.MessageConfig {
-	anekdot, err := t.services.Anekdot.GetRandomAnekdot(ctx)
-
-	if err != nil {
-		t.log.Println(err)
-		return tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
-	}
-
-	message := anekdot.Text
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
-
-	msg.ReplyMarkup = createKeyboardRating(anekdot)
-
-	return msg
+	return t.anekMsg(ctx, update.Message.Chat.ID)
 }
 
 // /help
