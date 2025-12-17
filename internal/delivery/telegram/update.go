@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/Denuha/anekdot-service/internal/models"
 	"github.com/Denuha/anekdot-service/internal/utils"
@@ -13,6 +14,7 @@ import (
 
 func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotapi.BotAPI) {
 	for update := range *updates {
+		start := time.Now()
 		if update.Message != nil {
 			t.log.Printf("[%s] message %s", update.Message.From.String(), update.Message.Text)
 
@@ -66,6 +68,8 @@ func (t *Telegram) ProcessUpdates(updates *tgbotapi.UpdatesChannel, bot *tgbotap
 			newMsg := t.anekMsg(ctx, update.CallbackQuery.Message.Chat.ID)
 			bot.Send(newMsg)
 		}
+
+		t.log.Println("time request", time.Since(start))
 	}
 }
 
