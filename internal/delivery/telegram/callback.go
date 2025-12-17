@@ -9,17 +9,17 @@ import (
 )
 
 // callbackMsg изменяет рейтинг и возвращает новое сообщение для изменения клавиатуры
-func (t *Telegram) callbackMsg(ctx context.Context, query *tgbotapi.CallbackQuery) *tgbotapi.EditMessageReplyMarkupConfig {
+func (t *Telegram) callbackMsg(ctx context.Context, query *tgbotapi.CallbackQuery) (updateMsg tgbotapi.EditMessageReplyMarkupConfig) {
 	split := strings.Split(query.Data, ":")
 
 	// Если пришел не рейтинг
 	if split[0] != "rating" {
-		return nil
+		return
 	}
 	anekdotID, err := strconv.Atoi(split[1])
 	if err != nil {
 		t.log.Errorln(err)
-		return nil
+		return
 	}
 
 	var value int
@@ -38,22 +38,22 @@ func (t *Telegram) callbackMsg(ctx context.Context, query *tgbotapi.CallbackQuer
 	err = t.services.Anekdot.UpdateRating(ctx, anekdotID, value)
 	if err != nil {
 		t.log.Errorln(err)
-		return nil
+		return
 	}
 
 	anekdot, err := t.services.Anekdot.GetAnekdotByID(ctx, anekdotID)
 	if err != nil {
 		t.log.Errorln(err)
-		return nil
+		return
 	}
 	replyMarkupUpdate := createKeyboardRating(anekdot)
-	updateMsg := tgbotapi.NewEditMessageReplyMarkup(
+	updateMsg = tgbotapi.NewEditMessageReplyMarkup(
 		query.Message.Chat.ID,
 		query.Message.MessageID,
 		replyMarkupUpdate,
 	)
 
-	return &updateMsg
+	return updateMsg
 }
 
 // anekMsg анекдот и клавиатура с голосами
